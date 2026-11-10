@@ -124,10 +124,6 @@ def item_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
 
 
 def all_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
-    """Every group in UI order: per tab, its category group, then its item groups."""
-    groups: list[dict[str, Any]] = []
-    for top in catalog.top_levels:
-        single = Catalog([top])
-        groups.extend(category_groups(single, replacement))
-        groups.extend(item_groups(single, replacement))
-    return groups
+    """Every group in UI order: all "hide whole categories" groups first (in tab
+    order), then all individual item groups (in tab/subcategory order)."""
+    return category_groups(catalog, replacement) + item_groups(catalog, replacement)
