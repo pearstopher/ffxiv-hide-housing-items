@@ -25,6 +25,11 @@ def test_meta_fields_and_file_version():
     uuid.UUID(meta["Identifier"])
 
 
+def test_default_author_matches_example():
+    assert ModInfo().author == "Ane Mora"
+    assert build_meta(ModInfo())["Author"] == "Ane Mora"
+
+
 def test_default_data_replaces_nothing():
     meta = build_meta(ModInfo(), sample_groups())
     assert meta["DefaultData"] == {"Files": {}, "FileSwaps": {}, "Manipulations": []}
