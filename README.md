@@ -48,21 +48,22 @@ After a game patch, run `python -m hide_housing build --refresh` to pick up new 
 ## Install in Penumbra
 
 1. Open Penumbra (`/penumbra`) and go to the **Mods** tab.
-2. Click **Import Mod** and choose the `.pmp`, or drag the file onto the game window.
-3. Select **Hide Housing Furniture**, enable it for your collection, and open its **Settings**.
+2. Click **Import...** and choose the `.pmp`.
+3. Select **Hide Housing Furniture**, enable it for the **Default** collection (it won't work in
+   any other collection), and open its **Settings**.
 4. Turn on what you want to hide:
    - **"<Tab>: hide whole categories"** groups (listed first): one option per category, such
      as *Tabletop: hide whole categories → Lighting*.
    - **"<Tab> – <Category>"** groups: one option per item, such as *Tabletop – Lighting →
      a specific lamp*. Large categories are split into "…, Part 1", "…, Part 2" groups, because
      Penumbra allows at most 32 options per group.
-5. If a change doesn't show up right away, leave the house and come back in.
+5. Leave the house and come back in. Changes never show while you're inside, so you have to
+   do this after **every** change to the mod or its options.
 
 Some items share one 3D model (for example "Sheep Dolls" and "Jumbo Sheep Dolls"). Their option
 is named after the first item, the description lists the others, and hiding it hides all of them.
 
-To update, build again and re-import the new `.pmp`. Your option choices are tied to stable IDs,
-so they carry over as long as the item stays in the same category.
+To update, build again and re-import the new `.pmp`.
 
 ## Limitations
 

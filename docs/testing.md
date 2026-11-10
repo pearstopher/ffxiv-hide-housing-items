@@ -8,7 +8,9 @@ output: paths, groups, the replacement model, or the Penumbra format.
 
 - [ ] `python -m hide_housing build` succeeds and prints a summary with `Skipped` near 0
 - [ ] If a previous version is installed, remove it from Penumbra, then import the new `.pmp`
+      with **Import...**
 - [ ] Penumbra shows **Hide Housing Furniture** with no import warnings
+- [ ] The mod is enabled for the **Default** collection (it won't work in any other)
 - [ ] Settings list every "<Tab>: hide whole categories" group first, then the "<Tab> – <Category>" groups
 - [ ] No group has more than 32 options. Penumbra would warn about ignored options otherwise.
 
@@ -23,7 +25,8 @@ output: paths, groups, the replacement model, or the Penumbra format.
 - [ ] **Overlap:** turn on a category and one of its items together. The item stays hidden and
       nothing errors.
 
-If a change doesn't show up, leave the house and re-enter before marking a step as failed.
+Changes never show while you're inside the house. After **every** option change, leave the
+house and come back in before checking the result.
 
 ## Notes
 
