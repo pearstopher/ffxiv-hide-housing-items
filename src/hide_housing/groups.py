@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable, Sequence
 from typing import Any
 
 from hide_housing import penumbra
-from hide_housing.catalog import Catalog, FurnitureModel, TopLevel
+from hide_housing.catalog import Catalog, FurnitureModel, Subcategory, TopLevel
 from hide_housing.meta import multi_group, option
 from hide_housing.paths import model_paths
 
+# Category and item options redirect to the same replacement, so overlaps are
+# harmless (see docs/penumbra-format.md). Item groups get a higher priority so
+# they would win if the two ever diverge (e.g. per-item replacements later).
 CATEGORY_GROUP_PRIORITY = 0
+ITEM_GROUP_PRIORITY = 1
 
 
 def hide_files(models: Iterable[FurnitureModel], replacement: str) -> dict[str, str]:
@@ -71,4 +76,58 @@ def category_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
                 CATEGORY_GROUP_PRIORITY,
                 f"Hide every item in a {top.name} category at once.",
             ))
+    return groups
+
+
+def item_group_name(top: TopLevel, sub: Subcategory) -> str:
+    return f"{top.name} – {sub.name}"
+
+
+def model_option(group_name: str, model: FurnitureModel, label: str, replacement: str) -> dict[str, Any] | None:
+    """Option hiding one furniture model, or None if it has no valid paths."""
+    files = hide_files([model], replacement)
+    if not files:
+        return None
+    others = model.item_names[1:]
+    description = f"Also hides: {', '.join(others)} (same model)." if others else ""
+    return option(group_name, label, files, description, id_key=f"model {model.model_key}")
+
+
+def item_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
+    """One group per subcategory with one option per furniture model.
+
+    Options are named after the model's first item; other items sharing the
+    model are listed in the description. Large subcategories are split into
+    ``"<name>, Part N"`` groups of at most 32 options. All options start off.
+    """
+    groups: list[dict[str, Any]] = []
+    for top in catalog.top_levels:
+        for sub in top.subcategories:
+            name = item_group_name(top, sub)
+            name_counts = Counter(m.name for m in sub.models)
+            options = []
+            for model in sub.models:
+                label = model.name
+                if name_counts[label] > 1:  # keep option names unique within a group
+                    label = f"{label} (model {model.model_key:04d})"
+                opt = model_option(name, model, label, replacement)
+                if opt is not None:
+                    options.append(opt)
+            if options:
+                groups.extend(split_multi_groups(
+                    name,
+                    options,
+                    ITEM_GROUP_PRIORITY,
+                    f"Hide individual {top.name} > {sub.name} items.",
+                ))
+    return groups
+
+
+def all_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
+    """Every group in UI order: per tab, its category group, then its item groups."""
+    groups: list[dict[str, Any]] = []
+    for top in catalog.top_levels:
+        single = Catalog([top])
+        groups.extend(category_groups(single, replacement))
+        groups.extend(item_groups(single, replacement))
     return groups
