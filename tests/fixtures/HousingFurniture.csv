@@ -1,0 +1,6 @@
+#,UsageParameter,CustomTalk,Item,ModelKey,HousingItemCategory,UsageType,PlaceLimitType,AquariumTier,Placement,Unplacement,UnplacementStorage,DestroyOnRemoval,Unknown4,Unknown5,Unknown6
+196608,0,0,0,0,0,0,0,0,0,0,0,False,False,False,False
+196609,0,0,6601,1,13,0,0,0,0,0,0,False,False,True,False
+196898,0,0,8799,290,14,0,0,0,0,0,0,False,False,True,False
+197119,0,0,15998,290,14,0,0,0,3,0,0,False,False,True,False
+197269,0,0,21839,633,12,0,0,0,0,0,0,False,False,True,False
