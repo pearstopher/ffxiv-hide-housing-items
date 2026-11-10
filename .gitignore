@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+
+# Build output
+build/
+dist/
+*.pmp
+
+# Downloaded datamining CSV cache
+.cache/
