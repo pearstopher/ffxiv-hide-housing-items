@@ -1,0 +1,4 @@
+# Game assets are binary; never touch line endings.
+*.mdl binary
+*.tex binary
+*.pmp binary
