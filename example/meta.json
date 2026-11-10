@@ -8,8 +8,7 @@
 	"Version": "0.1",
 	"DefaultData": {
 		"Files": {
-			"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl",
-			"bgcommon/hou/indoor/general/0633/texture/fun_b0_m0633_0a_n.tex": "files\\table_mat_d.tex"
+			"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl"
 		}
 	},
 	"Groups": [
@@ -24,8 +23,7 @@
 					"Id": "d2ba9f93-56c3-41e6-8a51-484a2f1b8bb8",
 					"Name": "Skybox option",
 					"Files": {
-						"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl",
-						"bgcommon/hou/indoor/general/0633/texture/fun_b0_m0633_0a_n.tex": "files\\table_mat_d.tex"
+						"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl"
 					}
 				}
 			]
