@@ -32,7 +32,7 @@ def stable_id(*parts: str) -> str:
 @dataclass(frozen=True)
 class ModInfo:
     name: str = "Hide Housing Furniture"
-    author: str | None = None
+    author: str | None = "Ane Mora"
     description: str = (
         "Hide any indoor housing furniture, by whole category or item by item. "
         "Nothing is hidden until you enable options."
