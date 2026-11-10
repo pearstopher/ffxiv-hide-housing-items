@@ -1,0 +1,35 @@
+{
+	"FileVersion": 4,
+	"Identifier": "3a9be735-1d80-40f6-98c0-f93c6f1e56e4",
+	"LastWrite": "2026-11-07T20:30:10.881719Z",
+	"Name": "Furniture Removal Test",
+	"Author": "Ane Mora",
+	"Description": "Trying to stop a furniture from rendering",
+	"Version": "0.1",
+	"DefaultData": {
+		"Files": {
+			"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl",
+			"bgcommon/hou/indoor/general/0633/material/fun_b0_m0633_0a.mtrl": "files\\table_mat.mtrl",
+			"bgcommon/hou/indoor/general/0633/texture/fun_b0_m0633_0a_n.tex": "files\\table_mat_d.tex"
+		}
+	},
+	"Groups": [
+		{
+			"Type": "Multi",
+			"Id": "57954cbb-c60f-48ac-bad3-a793b12ccdb6",
+			"Name": "Skybox option",
+			"DefaultSettings": 1,
+			"Options": [
+				{
+					"Id": "d2ba9f93-56c3-41e6-8a51-484a2f1b8bb8",
+					"Name": "Skybox option",
+					"Files": {
+						"bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl": "files\\table_mat.mdl",
+						"bgcommon/hou/indoor/general/0633/material/fun_b0_m0633_0a.mtrl": "files\\table_mat.mtrl",
+						"bgcommon/hou/indoor/general/0633/texture/fun_b0_m0633_0a_n.tex": "files\\table_mat_d.tex"
+					}
+				}
+			]
+		}
+	]
+}
