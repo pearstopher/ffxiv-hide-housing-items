@@ -41,10 +41,20 @@ class ModInfo:
     website: str | None = "https://github.com/pearstopher/ffxiv-hide-housing-items"
 
 
-def option(group_name: str, name: str, files: Mapping[str, str], description: str = "") -> dict[str, Any]:
-    """A Multi group option redirecting ``files`` (game path -> mod file path)."""
+def option(
+    group_name: str,
+    name: str,
+    files: Mapping[str, str],
+    description: str = "",
+    id_key: str | None = None,
+) -> dict[str, Any]:
+    """A Multi group option redirecting ``files`` (game path -> mod file path).
+
+    The ID derives from ``group_name`` and ``id_key`` (default: ``name``). Pass a
+    stable ``id_key`` such as a model key so renaming the option keeps its ID.
+    """
     return {
-        "Id": stable_id("option", group_name, name),
+        "Id": stable_id("option", group_name, id_key if id_key is not None else name),
         "Name": name,
         "Description": description,
         "Priority": 0,
