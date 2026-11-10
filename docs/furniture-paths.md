@@ -95,3 +95,11 @@ Subcategory names repeat across top-level groups ("Miscellaneous", "Lighting", "
 Stage Panel (key 633), Sheep Dolls + Jumbo Sheep Dolls (shared key 290, not in the catalog),
 an unused row, and the full category sheet. `tests/test_furniture_paths_data.py` checks the
 chain above against them.
+
+## Catalog vs. HousingItemCategory
+
+One item disagrees between the two sources: "Lattice-windowed Cabinet" (model 1466) has
+`HousingItemCategory` 13 (Tables) but is listed in the catalog under Furnishings ›
+Shelves/Chests. When an item is in the catalog, `catalog.py` uses the catalog's subcategory
+**and its top level**, because that is where players find it in game. Only items missing from
+the catalog fall back to `HousingItemCategory` + "Other".
