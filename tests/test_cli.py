@@ -40,7 +40,7 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
     assert meta["Author"] == "Ane Mora"
     assert [g["Name"] for g in meta["Groups"]][:2] == [
         "Furnishings: hide whole categories",
-        "Furnishings – Walls/Pillars/Partitions",
+        "Tables: hide whole categories",
     ]
 
     summary = capsys.readouterr().out

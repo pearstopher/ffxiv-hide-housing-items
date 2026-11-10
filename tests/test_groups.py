@@ -153,14 +153,14 @@ def test_invalid_models_are_left_out():
     assert [o["Name"] for o in group["Options"]] == ["Fine"]
 
 
-def test_all_groups_order_category_group_then_items_per_tab():
+def test_all_groups_lists_every_category_group_before_item_groups():
     names = [g["Name"] for g in all_groups(fixture_catalog(), REPLACEMENT)]
     assert names == [
         "Furnishings: hide whole categories",
-        "Furnishings – Walls/Pillars/Partitions",
         "Tables: hide whole categories",
-        "Tables – Tables",
         "Tabletop: hide whole categories",
+        "Furnishings – Walls/Pillars/Partitions",
+        "Tables – Tables",
         "Tabletop – Other",
     ]
     build_meta(ModInfo(), all_groups(fixture_catalog(), REPLACEMENT))
