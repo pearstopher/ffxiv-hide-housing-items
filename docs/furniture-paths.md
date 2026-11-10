@@ -73,7 +73,8 @@ Subcategory names repeat across top-level groups ("Miscellaneous", "Lighting", "
    items sold by the housing catalog NPC. Items from other sources (e.g. "Sheep Dolls") are
    only in `HousingFurniture`. **Recommendation:** use `HousingFurniture` as the master list;
    use the catalog subcategory when present, otherwise file the item under
-   "<Top level> – Other".
+   "<Top level> – Other". Exception: a tab with only one subcategory (Rugs) has no "Other";
+   uncatalogued rugs go straight into "Rugs – Rugs".
 2. **Shared model keys (122 keys).** Several items can use the same model, e.g. key 290 =
    "Sheep Dolls" and "Jumbo Sheep Dolls" (same model, scaled), and key 243 is shared by 30+
    retainer/vendor permits. Hiding one hides them all. **Recommendation:** make one option per
