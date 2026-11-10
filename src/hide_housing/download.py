@@ -32,6 +32,7 @@ def _fetch(url: str) -> bytes:
         with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
             return response.read()
     except urllib.error.HTTPError as exc:
+        exc.close()  # an HTTPError holds the open response
         raise DownloadError(f"Could not download {url}: HTTP {exc.code} {exc.reason}") from exc
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         reason = getattr(exc, "reason", exc)
