@@ -8,7 +8,8 @@ See docs/furniture-paths.md for how the sheets link together. Key decisions:
   that uses it (122 models are shared by several items).
 - When an item is in the catalog, its catalog subcategory (and that
   subcategory's top-level group) is used, matching where players find it.
-  Otherwise it goes under "Other" in its ``HousingItemCategory`` top level.
+  Otherwise it goes under "Other" in its ``HousingItemCategory`` top level,
+  unless that tab has only one subcategory (Rugs), in which case it joins it.
 """
 
 from __future__ import annotations
@@ -92,6 +93,13 @@ def build_catalog(
     item_to_category = {row["Item"]: row["Category"] for row in catalog_items.values()}
     skipped: list[str] = []
 
+    # Tabs with exactly one catalog subcategory (currently only Rugs): furniture
+    # missing from the catalog joins that subcategory instead of "Other".
+    tab_categories: dict[int, list[int]] = {}
+    for category_id, cat in categories.items():
+        tab_categories.setdefault(cat["Unknown0"], []).append(category_id)
+    only_category = {tab: ids[0] for tab, ids in tab_categories.items() if len(ids) == 1}
+
     # model key -> (top level id, catalog category id or None, [(item id, name)])
     grouped: dict[int, tuple[int, int | None, list[tuple[int, str]]]] = {}
     for row_id, row in sorted(furniture.items()):
@@ -105,6 +113,8 @@ def build_catalog(
         category_id = item_to_category.get(item_id)
         if category_id is not None:
             top_id = categories[category_id]["Unknown0"]
+        else:
+            category_id = only_category.get(top_id)
         if top_id not in TOP_LEVEL_NAMES:
             skipped.append(f"{name} (model {model_key}): unknown top level {top_id}")
             continue

@@ -101,6 +101,23 @@ def test_subcategories_sorted_by_game_order_with_other_last_and_models_by_name()
     ]
 
 
+def test_uncatalogued_rugs_join_the_only_rugs_subcategory():
+    categories = {**CATEGORIES, 27: {"Category": "Rugs", "Unknown0": 16, "Unknown1": 0}}
+    catalog = build_catalog(
+        furniture((20, 20, 16), (21, 21, 16), (22, 22, 12)),
+        catalog_items(i20=27),
+        categories,
+        {20: "Catalog Rug", 21: "Event Rug", 22: "Odd Chair"},
+    )
+    rugs = next(t for t in catalog.top_levels if t.name == "Rugs")
+    assert [(s.name, s.catalog_id, [m.name for m in s.models]) for s in rugs.subcategories] == [
+        ("Rugs", 27, ["Catalog Rug", "Event Rug"])
+    ]
+    # tabs with several subcategories still use "Other"
+    furnishings = next(t for t in catalog.top_levels if t.name == "Furnishings")
+    assert [s.name for s in furnishings.subcategories] == [OTHER_SUBCATEGORY]
+
+
 def test_shared_model_takes_category_from_any_catalogued_item():
     catalog = build_catalog(
         furniture((5, 7, 12), (9, 7, 12)), catalog_items(i9=4), CATEGORIES, {5: "Old", 9: "New"}
