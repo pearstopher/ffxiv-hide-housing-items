@@ -135,7 +135,17 @@ def item_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) 
     return groups
 
 
-def all_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:
-    """Every group in UI order: all "hide whole categories" groups first (in tab
-    order), then all individual item groups (in tab/subcategory order)."""
-    return category_groups(catalog, replacement, parts) + item_groups(catalog, replacement, parts)
+def all_groups(
+    catalog: Catalog,
+    replacement: str,
+    parts: Parts | None = None,
+    catch_all: Sequence[dict[str, Any]] = (),
+) -> list[dict[str, Any]]:
+    """Every group in UI order: all bulk groups first (the per-tab "hide whole
+    categories" groups, then the ``catch_all`` groups), then all individual item
+    groups (in tab/subcategory order)."""
+    return (
+        category_groups(catalog, replacement, parts)
+        + list(catch_all)
+        + item_groups(catalog, replacement, parts)
+    )

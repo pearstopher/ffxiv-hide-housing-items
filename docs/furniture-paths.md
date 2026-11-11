@@ -162,11 +162,23 @@ suffixes are added, because nothing confirms that unused redirects are harmless.
 Flowerpot flowers are gardening models. `GardeningSeed` rows with `IsPlantPotFlowerSeed = True`
 (27 seeds) have `ModelID` 101+, which matches `bgcommon/hou/outdoor/frm/{ModelID:04d}/bgparts/*.mdl`
 in the path list. These models belong to the **seed, not the pot**, so the same flower shows in
-every flowerpot. Hiding them is possible in bulk (all pot-flower models from `GardeningSeed`), but
-it hides those flowers in **all** flowerpots, and maybe in outdoor beds too (not checked). That's a
-design decision → follow-up issue.
+every flowerpot.
 
-It isn't confirmed whether the flower items seen in game were flowerpots (UsageType 11) or vases
-(UsageType 12). For vase and picture-frame contents, the path list has no `.mdl` under the likely
-folders (`outdoor/hana`, `indoor/pic`), so their model source wasn't found. Aquarium fish and
+**Implemented in #41: one catch-all option, "All flowers and plants" (best guess).**
+- **Which seeds:** datamined. All 34 `GardeningSeed` `ModelID`s: crops, shards (crystals can be
+  planted, confirmed by the user), and the 27 flowerpot seeds.
+- **Which files:** a pattern derived from ResLogger2, which the user approved for plant and food
+  model guesses only:
+  - every seed: `frm_f{1-5}_m0{ID:03d}.mdl`
+  - flowerpot seeds also: `frm_f4_m{1-9}{ID:03d}.mdl` and `han_f4_m{0-9}{ID:03d}.mdl`
+- **Coverage:** the pattern gives 683 paths. That covers all 668 gardening models in the path
+  list, plus 15 guessed gaps, and the 3 paths the user captured in game with Penumbra's Resource
+  Logger.
+- **Outdoors:** outdoor garden plots use the same models, so they may be hidden there too.
+- **No per-flower options,** by request.
+
+**Vase flowers:** the user's capture showed the Riviera and Glade *Flower Vase* (keys 0143, 0145)
+loading `han_f4_m0001.mdl` and `han_f4_m0003.mdl` from their own furniture folders. Those are
+already extra parts in the saved multi-part list (#40), so hiding the vase hides its flowers.
+Picture-frame contents and the display vases (UsageType 12) weren't traced. Aquarium fish and
 mannequin gear are out of scope: they are separate items, not part of the furniture.
