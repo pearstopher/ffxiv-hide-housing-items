@@ -4,11 +4,14 @@ import pytest
 
 from hide_housing.assets import bundle_replacement, default_replacement
 
-EXAMPLE_MODEL = Path(__file__).resolve().parent.parent / "example" / "files" / "table_mat.mdl"
+EXAMPLE_FILES = Path(__file__).resolve().parent.parent / "example" / "files"
 
 
-def test_default_replacement_is_the_example_stand_in():
-    assert default_replacement().read_bytes() == EXAMPLE_MODEL.read_bytes()
+def test_default_replacement_is_the_tested_tiny_model():
+    default = default_replacement().read_bytes()
+    assert default == (EXAMPLE_FILES / "replacement.mdl").read_bytes()
+    assert default != (EXAMPLE_FILES / "table_mat.mdl").read_bytes()
+    assert default[:4] == (0x01000006).to_bytes(4, "little")  # .mdl version 6 header
 
 
 def test_copies_default_into_files_dir(tmp_path):

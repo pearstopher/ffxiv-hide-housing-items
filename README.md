@@ -5,8 +5,8 @@ housing furniture, either a whole category at once or item by item. The furnitur
 straight from the latest [datamining](https://github.com/xivapi/ffxiv-datamining), so a rebuild
 picks up new furniture after each patch.
 
-Nothing is hidden until you turn options on. Hidden furniture is currently swapped for a small
-stand-in model rather than removed completely (see [Limitations](#limitations)).
+Nothing is hidden until you turn options on. Hidden furniture is swapped for a tiny replacement
+model so it no longer shows (see [Limitations](#limitations) for furniture made of several parts).
 
 ## Build the mod
 
@@ -40,7 +40,7 @@ Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
 | `--refresh` | Re-download the datamining CSVs (otherwise the copy in `.cache/datamining/` is reused) |
 | `--out DIR` | Write the `.pmp` to `DIR` instead of `dist/` |
 | `--cache-dir DIR` | Keep downloaded CSVs in `DIR` instead of `.cache/datamining/` |
-| `--replacement MDL` | Use your own `.mdl` instead of the bundled stand-in model |
+| `--replacement MDL` | Use your own `.mdl` instead of the bundled replacement model |
 | `-v`, `--verbose` | Show progress and warnings |
 
 After a game patch, run `python -m hide_housing build --refresh` to pick up new furniture.
@@ -67,8 +67,6 @@ To update, build again and re-import the new `.pmp`.
 
 ## Limitations
 
-- Hidden furniture is replaced with a small stand-in model rather than made fully invisible
-  ([#15](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/15)).
 - Only each item's main model is replaced. Some furniture is built from more than one model, so
   parts of it can stay visible
   ([#35](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/35)).
