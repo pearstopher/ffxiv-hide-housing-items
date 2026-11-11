@@ -125,9 +125,34 @@ def model_option(
     files = hide_files([model], replacement, parts)
     if not files:
         return None
-    others = model.item_names[1:]
-    description = f"Also hides: {', '.join(others)} (same model)." if others else ""
+    description = also_hides_description(model.item_names[1:])
     return option(group_name, label, files, description, id_key=f"model {model.model_key}")
+
+
+MAX_DESCRIPTION_LENGTH = 100
+
+
+def also_hides_description(others: Sequence[str]) -> str:
+    """One short sentence naming the other items that share a model.
+
+    Lists as many names as fit in ``MAX_DESCRIPTION_LENGTH`` characters and
+    summarises the rest as "and N more".
+    """
+    if not others:
+        return ""
+    full = f"Also hides: {', '.join(others)} (same model)."
+    if len(full) <= MAX_DESCRIPTION_LENGTH:
+        return full
+    shown = 0
+    while shown < len(others):
+        more = len(others) - (shown + 1)
+        candidate = f"Also hides: {', '.join(others[:shown + 1])} and {more} more (same model)."
+        if len(candidate) > MAX_DESCRIPTION_LENGTH:
+            break
+        shown += 1
+    if shown == 0:
+        return f"Also hides {len(others)} other items (same model)."
+    return f"Also hides: {', '.join(others[:shown])} and {len(others) - shown} more (same model)."
 
 
 def item_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:

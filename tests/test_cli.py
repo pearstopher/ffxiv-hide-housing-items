@@ -148,3 +148,17 @@ def test_refresh_parts_flag_updates_saved_file(tmp_path, cache, capsys, monkeypa
 
     assert cli.main(args) == 0
     assert "Parts list:    refreshed, no changes" in capsys.readouterr().out
+
+
+def test_every_description_is_one_short_sentence(tmp_path, cache, no_network, capsys):
+    out = tmp_path / "dist"
+    assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
+    with zipfile.ZipFile(out / "hide-housing-furniture-0.1.0.pmp") as archive:
+        meta = json.loads(archive.read("meta.json"))
+    descriptions = [meta["Description"]]
+    for group in meta["Groups"]:
+        descriptions.append(group["Description"])
+        descriptions += [o["Description"] for o in group["Options"]]
+    for text in filter(None, descriptions):
+        assert len(text) <= 100, text
+        assert text.endswith(".") and ". " not in text, text
