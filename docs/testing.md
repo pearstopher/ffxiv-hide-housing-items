@@ -51,3 +51,4 @@ house and come back in before checking the result.
 | 2026-11-10 | 0.1.0 | Ane Mora | Hide one category: pass. Hide one item: pass. Multi-part furniture (e.g. flower items, doors) keeps some parts visible; tracked in #35. |
 | 2026-11-10 | 0.1.0 | Ane Mora | Tiny replacement model (#15, made via Penumbra glTF export/import + Blender): works. |
 | 2026-11-10 | 0.1.0 | Ane Mora | Multi-part furniture (#40): pass, no remaining multi-part leftovers seen. Catch-all *All flowers and plants* (#41): pass. Catch-all *All food* (#44): pass. Flower Vases hide together with their flowers: pass. |
+| 2026-11-10 | 0.1.0 | Ane Mora | All current checklist items pass. Housing effects (#49, #51, incl. dyna1/com1/craft1): pass. Renamed "<Tab>: Hide Categories" groups and the *Miscellaneous* group with All rugs / All flowers and plants / All food / All housing effects (#53): pass. One-sentence descriptions (#55): pass. Presets Hide Everything and Rainbow Cafe (#57): pass. |
