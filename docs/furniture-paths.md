@@ -191,21 +191,25 @@ already extra parts in the saved multi-part list (#40), so hiding the vase hides
 Picture-frame contents and the display vases (UsageType 12) weren't traced. Aquarium fish and
 mannequin gear are out of scope: they are separate items, not part of the furniture.
 
-## Indoor housing effects (#49)
+## Housing effects (#49, #51)
 
 **Datamining can't link housing items to VFX.** None of the 8,027 `csv/en` sheets connect
 furniture to effect files. `VFX.csv` holds character and monster effects, and `ExportedSG` lists
 only 8 housing scene files. The link lives inside each item's scene file (`.sgb`), which Lumina
 can parse (`LayerEntryType.VFX`, `LineVFX`), but that needs the user's game files.
 
-**Implemented approach (user's choice):** one bulk option that disables **every** effect under
-`bgcommon/hou/common/vfx_hou_ind1/`, with no per-effect options.
-- **Effect list:** taken from the ResLogger2 path list (224 `.avfx` files on 2026-11-10) and saved
-  in `src/hide_housing/data/indoor_vfx.json`. It is refreshed together with the multi-part list
-  by `build --refresh-parts`.
+**Implemented approach (user's choice):** one bulk option, *All housing effects*, that disables
+**every** effect under these `bgcommon/hou/common/` folders, with no per-effect options:
+`vfx_hou_ind1` (#49), plus `vfx_hou_dyna1`, `vfx_hou_com1` and `vfx_hou_craft1` (#51). The outdoor
+folder, `vfx_hou_out1`, is excluded.
+- **Effect list:** taken from the ResLogger2 path list and saved in
+  `src/hide_housing/data/housing_vfx.json`. On 2026-11-10 it had 281 `.avfx` files: 224 ind1,
+  44 dyna1, 8 com1 and 5 craft1. It is refreshed together with the multi-part list by
+  `build --refresh-parts`.
+- **Option ID:** the option was first called *All indoor housing effects*. It keeps that name as
+  its ID key, so existing settings carry over.
 - **How:** each effect is a Penumbra `FileSwaps` entry to `vfx/path/nothing.avfx`, a path that
   doesn't exist, so the load fails. EasyEyes rewrites effect paths to this same path to remove
   effects (`EasyEyes/ResourceLoader.cs`), and Penumbra's Resource Logger exempts it from
   load-failure warnings for that reason (`Penumbra/UI/ResourceWatcher/ResourceWatcher.cs`).
-  Doing it through a Penumbra file swap instead of EasyEyes' hook still needs to be confirmed in
-  game.
+  The user confirmed in game that this works through a Penumbra file swap (#49).

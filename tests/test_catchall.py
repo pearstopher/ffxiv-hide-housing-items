@@ -18,7 +18,7 @@ from hide_housing.catchall import (
 )
 from hide_housing.groups import all_groups
 from hide_housing.meta import ModInfo, build_meta
-from hide_housing.parts import extract_indoor_vfx, load_indoor_vfx
+from hide_housing.parts import extract_housing_vfx, load_housing_vfx
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 SHEETS = ("HousingFurniture", "FurnitureCatalogItemList", "FurnitureCatalogCategory", "Item")
@@ -146,23 +146,43 @@ def test_shipped_fixture_has_no_food_so_no_food_option():
 VFX = "bgcommon/hou/common/vfx_hou_ind1/eff"
 
 
-def test_extract_indoor_vfx_only_vfx_hou_ind1_avfx():
+COMMON = "bgcommon/hou/common"
+INCLUDED = ("vfx_hou_ind1", "vfx_hou_dyna1", "vfx_hou_com1", "vfx_hou_craft1")
+
+
+def test_extract_housing_vfx_takes_four_folders_but_not_outdoor():
     lines = [
         f"{VFX}/i_fire0001_o.avfx",
         f"{VFX}/i_fire0001_o.avfx",
         f"{VFX}/i_fire0001_o.atex",
-        "bgcommon/hou/common/vfx_hou_out1/eff/o_fire0001_o.avfx",
-        "bgcommon/hou/common/vfx_hou_com1/eff/bl_stop01l_o.avfx",
-        f"{VFX}/a_light001_y.avfx",
+        f"{COMMON}/vfx_hou_out1/eff/o_fire0001_o.avfx",
+        f"{COMMON}/vfx_hou_com1/eff/bl_stop01l_o.avfx",
+        f"{COMMON}/vfx_hou_dyna1/eff/d_x.avfx",
+        f"{COMMON}/vfx_hou_craft1/eff/c_x.avfx",
+        f"{COMMON}/vfx_hou_ind10/eff/not_a_match.avfx",
     ]
-    assert extract_indoor_vfx(lines) == [f"{VFX}/a_light001_y.avfx", f"{VFX}/i_fire0001_o.avfx"]
+    assert extract_housing_vfx(lines) == [
+        f"{COMMON}/vfx_hou_com1/eff/bl_stop01l_o.avfx",
+        f"{COMMON}/vfx_hou_craft1/eff/c_x.avfx",
+        f"{COMMON}/vfx_hou_dyna1/eff/d_x.avfx",
+        f"{VFX}/i_fire0001_o.avfx",
+    ]
 
 
-def test_shipped_indoor_vfx_list():
-    vfx = load_indoor_vfx()
-    assert len(vfx) >= 200
+def test_shipped_housing_vfx_list():
+    vfx = load_housing_vfx()
     assert vfx == sorted(set(vfx))
-    assert all(p.startswith("bgcommon/hou/common/vfx_hou_ind1/") and p.endswith(".avfx") for p in vfx)
+    assert all(p.endswith(".avfx") for p in vfx)
+    folders = {p.split("/")[3] for p in vfx}
+    assert folders == set(INCLUDED)
+    assert len([p for p in vfx if "/vfx_hou_ind1/" in p]) >= 200
+
+
+def test_effects_option_keeps_its_original_id():
+    from hide_housing.meta import stable_id
+    (group,) = effects_groups([f"{VFX}/a.avfx"])
+    assert group["Options"][0]["Name"] == "All housing effects"
+    assert group["Options"][0]["Id"] == stable_id("option", EFFECTS_GROUP_NAME, "All indoor housing effects")
 
 
 def test_effects_group_is_one_bulk_option_using_file_swaps():
