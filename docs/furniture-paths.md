@@ -80,12 +80,9 @@ Subcategory names repeat across top-level groups ("Miscellaneous", "Lighting", "
    retainer/vendor permits. Hiding one hides them all. **Recommendation:** make one option per
    model key and list every item name in the option label or description.
 3. **Unused rows.** Skip rows where `Item` or `ModelKey` is `0`, and items with a blank name.
-4. **Multi-part models (unverified).** Some furniture is built from several parts listed in its
-   `.sgb` (e.g. `asset/fun_b0_m{NNNN}.sgb`), and a part may have a different filename such as
-   `fun_b0_m{NNNN}a.mdl`, `_b1_`, or a model under another key. Replacing only
-   `fun_b0_m{NNNN}.mdl` may leave such pieces visible. This needs game files to confirm, e.g.
-   with Penumbra's resource logger or TexTools. For now, code generates only the main path, and
-   in-game testing (#14) should note any items that don't fully disappear.
+4. **Multi-part furniture.** Confirmed in game: some furniture keeps parts visible when only
+   `fun_b0_m{NNNN}.mdl` is replaced. Researched in #35; see
+   [Multi-part furniture](#multi-part-furniture-35) below.
 5. **Items outside `indoor/general`.** All indoor furniture checked so far uses
    `indoor/general/`. Outdoor furniture is in a different sheet (`HousingYardObject`), which is
    out of scope.
@@ -104,3 +101,70 @@ One item disagrees between the two sources: "Lattice-windowed Cabinet" (model 14
 Shelves/Chests. When an item is in the catalog, `catalog.py` uses the catalog's subcategory
 **and its top level**, because that is where players find it in game. Only items missing from
 the catalog fall back to `HousingItemCategory` + "Other".
+
+## Multi-part furniture (#35)
+
+In-game testing showed two kinds of leftover parts after hiding an item: **doors** (the frame is
+hidden, the door leaf stays) and **interactable flower items** (the pot or vase is hidden, the
+flowers stay). Researched 2026-11-10.
+
+### Data source: ResLogger2 path list
+
+[ResLogger2](https://github.com/perchbirdd/ResLogger2) collects game file paths that players'
+clients have loaded and publishes them. The current-patch list is at
+`https://rl2.perchbird.dev/download/export/CurrentPathList.gz` (~8 MB gzip, ~1.8 M paths, one per
+line). The URL comes from a tool that uses it:
+[NotNite/Alpha `PathListService.cs`](https://github.com/NotNite/Alpha/blob/main/Alpha/Services/PathListService.cs).
+The list only contains paths someone has seen, so it is **incomplete**. Of our 1,570 models,
+1,559 have at least one `.mdl` listed, and 1,509 have their main `fun_b0_m{NNNN}.mdl` listed.
+
+### Finding 1: extra parts sit next to the main model (doors, beds, partitions…)
+
+Every `.mdl` for indoor furniture in the list lives in `bgcommon/hou/indoor/general/{NNNN}/bgparts/`.
+**307 models** have more `.mdl` files there besides `fun_b0_m{NNNN}.mdl`, almost always with a
+letter suffix:
+
+| File name pattern | Models |
+|---|---|
+| `fun_b0_m{NNNN}a.mdl` | 281 |
+| `fun_b0_m{NNNN}b.mdl` | 134 |
+| `fun_b0_m{NNNN}c.mdl` … `g`, up to `s` | fewer |
+| other prefixes (`bds_t4_…`, `bks_t4_…`) | 7 (keys 0413–0415, 0472–0475) |
+
+Examples:
+- Doors: Mahogany Partition Door (0405) → `fun_b0_m0405a.mdl`; Factory Automatic Door (0974)
+  → `a`–`d`
+- Beds: Eastern and Tropical Canopy Beds (1113, 1408) → `a`
+- Kitchen Cabinet (1380) → 17 parts
+
+This matches the door observation: the main model is the frame, and the moving door is a
+separate part.
+
+**Bulk method:** at build time, download the path list, and for each model replace **every**
+`.mdl` listed under its `bgparts/` folder. This is programmatic and needs no per-item list.
+Limitation: parts nobody has loaded yet are missing from the list. A fallback could add the
+standard letter suffixes speculatively, but nothing confirms that unused redirects are harmless,
+so that would need in-game testing first. → follow-up issue.
+
+### Finding 2: flowerpot flowers are shared gardening models
+
+`HousingFurniture.UsageType` marks furniture that displays *other* content:
+
+| UsageType | Furniture | Content |
+|---|---|---|
+| 11 | Riviera / Glade / Oasis Flowerpot (3) | planted flowers |
+| 12 | vases, picture frames (34) | the item displayed in them |
+| 13 | aquariums (8) | fish (`bgcommon/hou/indoor/gyo/…`) |
+| 15 | mannequin | character gear |
+
+Flowerpot flowers are gardening models. `GardeningSeed` rows with `IsPlantPotFlowerSeed = True`
+(27 seeds) have `ModelID` 101+, which matches `bgcommon/hou/outdoor/frm/{ModelID:04d}/bgparts/*.mdl`
+in the path list. These models belong to the **seed, not the pot**, so the same flower shows in
+every flowerpot. Hiding them is possible in bulk (all pot-flower models from `GardeningSeed`), but
+it hides those flowers in **all** flowerpots, and maybe in outdoor beds too (not checked). That's a
+design decision → follow-up issue.
+
+It isn't confirmed whether the flower items seen in game were flowerpots (UsageType 11) or vases
+(UsageType 12). For vase and picture-frame contents, the path list has no `.mdl` under the likely
+folders (`outdoor/hana`, `indoor/pic`), so their model source wasn't found. Aquarium fish and
+mannequin gear are out of scope: they are separate items, not part of the furniture.
