@@ -63,7 +63,7 @@ def test_written_file_is_valid_utf8_json_with_backslash_paths(tmp_path):
     assert path.name == "meta.json"
     raw = path.read_text(encoding="utf-8")
     assert "Furnishings – Walls" in raw  # en dash kept as UTF-8, not \u escaped
-    assert '"files\\\\replacement.mdl"' in raw  # JSON-escaped backslash, like example/meta.json
+    assert '"files\\\\replacement.mdl"' in raw  # JSON-escaped backslash, as Penumbra writes it
     assert json.loads(raw)["Groups"][0]["Options"][0]["Files"] == STAGE_PANEL
 
 
