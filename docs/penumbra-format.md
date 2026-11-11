@@ -11,7 +11,7 @@ mod directory as-is. Layout for this project:
 ```
 meta.json          <- everything: mod info, default data, all option groups
 files/
-  table_mat.mdl    <- replacement asset(s) referenced from meta.json
+  replacement.mdl  <- replacement asset referenced from meta.json
 ```
 
 ## Target: `FileVersion` 4 (single `meta.json`)

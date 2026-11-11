@@ -87,7 +87,7 @@ def make_parser() -> argparse.ArgumentParser:
     b.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, metavar="DIR",
                    help=f"where downloaded CSVs are kept (default: {DEFAULT_CACHE_DIR})")
     b.add_argument("--replacement", type=Path, metavar="MDL",
-                   help="use this .mdl instead of the bundled stand-in model")
+                   help="use this .mdl instead of the bundled replacement model")
     b.add_argument("-v", "--verbose", action="store_true", help="show progress and warnings")
     return parser
 

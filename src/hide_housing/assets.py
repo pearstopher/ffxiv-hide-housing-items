@@ -1,7 +1,8 @@
 """The replacement model that hidden furniture is swapped for.
 
-The default is a simple stand-in model (a copy of ``example/files/table_mat.mdl``)
-until #15 provides an invisible one. Pass ``source`` to use a different file.
+The default is a tiny model made in Blender via Penumbra's glTF import/export and
+tested in game (#15); its source copy is ``example/files/replacement.mdl``. Pass
+``source`` to use a different file.
 """
 
 from __future__ import annotations

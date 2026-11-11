@@ -40,3 +40,4 @@ house and come back in before checking the result.
 | Date | Version | Tester | Result |
 |---|---|---|---|
 | 2026-11-10 | 0.1.0 | Ane Mora | Hide one category: pass. Hide one item: pass. Multi-part furniture (e.g. flower items, doors) keeps some parts visible; tracked in #35. |
+| 2026-11-10 | 0.1.0 | Ane Mora | Tiny replacement model (#15, made via Penumbra glTF export/import + Blender): works. |
