@@ -7,7 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from hide_housing import cli, download
+from hide_housing import __version__, cli, download
+
+PMP_NAME = f"hide-housing-furniture-{__version__}.pmp"
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -33,7 +35,7 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
     out = tmp_path / "dist"
     assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
 
-    pmp = out / "hide-housing-furniture-0.1.0.pmp"
+    pmp = out / PMP_NAME
     with zipfile.ZipFile(pmp) as archive:
         assert set(archive.namelist()) == {"meta.json", "files/replacement.mdl"}
         meta = json.loads(archive.read("meta.json"))
@@ -85,7 +87,7 @@ def test_custom_replacement(tmp_path, cache, no_network, capsys):
     out = tmp_path / "dist"
     assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out),
                      "--replacement", str(custom)]) == 0
-    with zipfile.ZipFile(out / "hide-housing-furniture-0.1.0.pmp") as archive:
+    with zipfile.ZipFile(out / PMP_NAME) as archive:
         assert archive.read("files/replacement.mdl") == b"\x00invisible"
 
 
@@ -106,7 +108,7 @@ def test_python_dash_m_entry_point():
     result = subprocess.run(
         [sys.executable, "-m", "hide_housing", "--version"], capture_output=True, text=True, check=True
     )
-    assert "0.1.0" in result.stdout
+    assert __version__ in result.stdout
 
 
 def test_multi_part_models_get_every_part_from_saved_list(tmp_path, cache, no_network, capsys, monkeypatch):
@@ -118,7 +120,7 @@ def test_multi_part_models_get_every_part_from_saved_list(tmp_path, cache, no_ne
     out = tmp_path / "dist"
     assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
 
-    with zipfile.ZipFile(out / "hide-housing-furniture-0.1.0.pmp") as archive:
+    with zipfile.ZipFile(out / PMP_NAME) as archive:
         meta = json.loads(archive.read("meta.json"))
     stage = next(o for g in meta["Groups"] for o in g["Options"] if o["Name"] == "Stage Panel")
     folder = "bgcommon/hou/indoor/general/0633/bgparts"
@@ -153,7 +155,7 @@ def test_refresh_parts_flag_updates_saved_file(tmp_path, cache, capsys, monkeypa
 def test_every_description_is_one_short_sentence(tmp_path, cache, no_network, capsys):
     out = tmp_path / "dist"
     assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
-    with zipfile.ZipFile(out / "hide-housing-furniture-0.1.0.pmp") as archive:
+    with zipfile.ZipFile(out / PMP_NAME) as archive:
         meta = json.loads(archive.read("meta.json"))
     descriptions = [meta["Description"]]
     for group in meta["Groups"]:

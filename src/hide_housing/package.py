@@ -21,7 +21,7 @@ class PackageError(ValueError):
 
 
 def pmp_filename(name: str, version: str) -> str:
-    """``"Hide Housing Furniture", "0.1.0"`` -> ``"hide-housing-furniture-0.1.0.pmp"``."""
+    """``"Hide Housing Furniture", "1.0.0"`` -> ``"hide-housing-furniture-1.0.0.pmp"``."""
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "mod"
     safe_version = re.sub(r"[^A-Za-z0-9._-]+", "-", version).strip("-") or "0"
     return f"{slug}-{safe_version}.pmp"
