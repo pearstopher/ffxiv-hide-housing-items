@@ -11,7 +11,8 @@ bgcommon/hou/indoor/general/{NNNN}/bgparts/fun_b0_m{NNNN}.mdl
 
 - `{NNNN}` is **`HousingFurniture.ModelKey`**, zero-padded to four digits (`633` → `0633`,
   `7` → `0007`). The largest key in the data is currently `1637`, so four digits are enough.
-- Only the `.mdl` is replaced. Textures are left alone (see `example/meta.json`).
+- Only the `.mdl` is replaced. Textures are left alone, as in the user's original hand-made test
+  mod (since removed, #62).
 
 ## The data chain
 
@@ -32,9 +33,9 @@ HousingFurniture                     Item
   bgcommon/hou/indoor/general/{ModelKey:04d}/bgparts/fun_b0_m{ModelKey:04d}.mdl
 ```
 
-Checked against the example. `HousingFurniture` row `197269` has `ModelKey 633` and `Item 21839`,
-which is **"Stage Panel"**: catalog category 8, "Walls/Pillars/Partitions", under Furnishings. So
-`fun_b0_m0633.mdl` in `example/meta.json` is the Stage Panel. The `0633` is the **model key, not
+Checked against the user's original test mod, which replaced `fun_b0_m0633.mdl`.
+`HousingFurniture` row `197269` has `ModelKey 633` and `Item 21839`, which is **"Stage Panel"**:
+catalog category 8, "Walls/Pillars/Partitions", under Furnishings. So that file is the Stage Panel. The `0633` is the **model key, not
 the item ID**: item 633 is a "Dated Hempen Tunic", and catalog row 633 is a different item.
 
 ### Columns

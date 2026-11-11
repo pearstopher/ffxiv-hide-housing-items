@@ -1,17 +1,11 @@
-import json
 import logging
-from pathlib import Path
 
 import pytest
 
 from hide_housing.paths import model_path, model_paths
 
-EXAMPLE_META = Path(__file__).resolve().parent.parent / "example" / "meta.json"
-
-
-def test_633_matches_example_meta():
-    meta = json.loads(EXAMPLE_META.read_text(encoding="utf-8"))
-    assert list(meta["DefaultData"]["Files"]) == [model_path(633)]
+def test_633_matches_the_original_test_mod():
+    # The path replaced by the user's original hand-made test mod, which worked in game.
     assert model_path(633) == "bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl"
 
 

@@ -1,7 +1,6 @@
 """Check the data chain documented in docs/furniture-paths.md against real fixture rows."""
 
 import csv
-import json
 from pathlib import Path
 
 from hide_housing.paths import model_path
@@ -15,14 +14,16 @@ def read(name):
         return {row["#"]: row for row in csv.DictReader(f)}
 
 
-def test_model_key_633_is_the_stage_panel_in_the_example():
+# The path replaced by the user's original hand-made test mod, which worked in game.
+ORIGINAL_TEST_MOD_PATH = "bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl"
+
+
+def test_model_key_633_is_the_stage_panel_from_the_original_test_mod():
     furniture = read("HousingFurniture")
     items = read("Item")
     row = next(r for r in furniture.values() if r["ModelKey"] == "633")
     assert items[row["Item"]]["Name"] == "Stage Panel"
-
-    example = json.loads((ROOT / "example" / "meta.json").read_text(encoding="utf-8"))
-    assert model_path(int(row["ModelKey"])) in example["DefaultData"]["Files"]
+    assert model_path(int(row["ModelKey"])) == ORIGINAL_TEST_MOD_PATH
 
 
 def test_catalog_category_links_to_top_level_group():

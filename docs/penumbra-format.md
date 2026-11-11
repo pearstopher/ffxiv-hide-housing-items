@@ -17,8 +17,7 @@ files/
 ## Target: `FileVersion` 4 (single `meta.json`)
 
 `FileVersion` 4 is the current version (`ModMeta.CurrentFileVersion = 4`). In v4, **everything
-lives in `meta.json`**: `DefaultData` and `Groups` are inline. `example/meta.json` already uses
-this layout.
+lives in `meta.json`**: `DefaultData` and `Groups` are inline.
 
 The older v3 layout split the data across `meta.json`, `default_mod.json` and one
 `group_NNN_<name>.json` per group. Penumbra still reads v3 and migrates it to v4 on load, but
@@ -49,7 +48,7 @@ Paths:
 - **Game paths (keys)** use forward slashes and must not start with `/`, `\`, `.`, `:` or `?`,
   e.g. `bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633.mdl`.
 - **File paths (values)** are relative to the mod root. Penumbra writes Windows backslashes
-  (`"files\\table_mat.mdl"` in JSON); the schema accepts either separator, but we match
+  (`"files\\replacement.mdl"` in JSON); the schema accepts either separator, but we match
   Penumbra and use backslashes.
 
 ## Groups
@@ -71,8 +70,8 @@ Optional UI fields that could help with a long list:
 
 ### `DefaultSettings`
 
-- **Multi**: a bitmask, where bit *i* enables option *i*. `0` = all off. The example's `1`
-  means "first option on". **We always use `0`.**
+- **Multi**: a bitmask, where bit *i* enables option *i*. `0` = all off, and `1` means "first
+  option on". **We always use `0`.**
 - **Single**: the index of the selected option.
 
 ### Option limits

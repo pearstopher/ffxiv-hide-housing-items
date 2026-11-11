@@ -1,16 +1,17 @@
-from pathlib import Path
+import hashlib
 
 import pytest
 
 from hide_housing.assets import bundle_replacement, default_replacement
 
-EXAMPLE_FILES = Path(__file__).resolve().parent.parent / "example" / "files"
+# The tiny model made in Blender and confirmed working in game (#15).
+TESTED_MODEL_SHA256 = "89f0438b339e5a9b6e9362563250d23e30a9a7db475193307444e651cdafed78"
 
 
 def test_default_replacement_is_the_tested_tiny_model():
     default = default_replacement().read_bytes()
-    assert default == (EXAMPLE_FILES / "replacement.mdl").read_bytes()
-    assert default != (EXAMPLE_FILES / "table_mat.mdl").read_bytes()
+    assert hashlib.sha256(default).hexdigest() == TESTED_MODEL_SHA256
+    assert len(default) == 830
     assert default[:4] == (0x01000006).to_bytes(4, "little")  # .mdl version 6 header
 
 

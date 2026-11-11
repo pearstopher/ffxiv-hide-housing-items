@@ -1,8 +1,7 @@
 """The replacement model that hidden furniture is swapped for.
 
 The default is a tiny model made in Blender via Penumbra's glTF import/export and
-tested in game (#15); its source copy is ``example/files/replacement.mdl``. Pass
-``source`` to use a different file.
+tested in game (#15). Pass ``source`` to use a different file.
 """
 
 from __future__ import annotations
