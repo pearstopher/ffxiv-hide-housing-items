@@ -47,8 +47,10 @@ def option(
     files: Mapping[str, str],
     description: str = "",
     id_key: str | None = None,
+    file_swaps: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    """A Multi group option redirecting ``files`` (game path -> mod file path).
+    """A Multi group option redirecting ``files`` (game path -> mod file path)
+    and ``file_swaps`` (game path -> another game path).
 
     The ID derives from ``group_name`` and ``id_key`` (default: ``name``). Pass a
     stable ``id_key`` such as a model key so renaming the option keeps its ID.
@@ -59,7 +61,7 @@ def option(
         "Description": description,
         "Priority": 0,
         "Files": dict(files),
-        "FileSwaps": {},
+        "FileSwaps": dict(file_swaps or {}),
         "Manipulations": [],
     }
 

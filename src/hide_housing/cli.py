@@ -13,12 +13,12 @@ from pathlib import Path
 from hide_housing import __version__
 from hide_housing.assets import bundle_replacement
 from hide_housing.catalog import Catalog, load_catalog
-from hide_housing.catchall import catch_all_groups, catch_all_option_specs
+from hide_housing.catchall import catch_all_groups, catch_all_option_specs, effects_groups
 from hide_housing.download import DEFAULT_CACHE_DIR, DownloadError, download_sheets
 from hide_housing.groups import all_groups
 from hide_housing.meta import ModInfo, build_meta, write_meta
 from hide_housing.package import DEFAULT_DIST_DIR, PackageError, package_mod
-from hide_housing.parts import Parts, load_parts, refresh_parts
+from hide_housing.parts import Parts, load_indoor_vfx, load_parts, refresh_parts
 from hide_housing.sheets import SheetError
 
 log = logging.getLogger("hide_housing")
@@ -32,6 +32,7 @@ class BuildResult:
     option_count: int
     parts: Parts
     parts_status: str
+    indoor_vfx_count: int = 0
 
     def summary(self) -> str:
         cat = self.catalog
@@ -47,6 +48,7 @@ class BuildResult:
             f"Items:         {items}",
             f"Groups:        {self.group_count} ({self.option_count} options)",
             f"Multi-part:    {len(multi)} models (+{extra_files} extra part files)",
+            f"Indoor VFX:    {self.indoor_vfx_count} effects",
             f"Parts list:    {self.parts_status}",
             f"Skipped:       {len(cat.skipped)}",
         ]
@@ -75,6 +77,7 @@ def build(
     else:
         parts = load_parts()
         parts_status = "saved file"
+    indoor_vfx = load_indoor_vfx()
     log.info("Fetching datamining sheets into %s%s", cache_dir, " (refresh)" if refresh else "")
     sheet_paths = download_sheets(cache_dir, refresh=refresh)
     catalog = load_catalog(sheet_paths)
@@ -84,7 +87,7 @@ def build(
         specs = catch_all_option_specs(
             sheet_paths.get("GardeningSeed"), sheet_paths.get("HousingFurniture"), parts
         )
-        catch_all = catch_all_groups(specs, replacement_path)
+        catch_all = catch_all_groups(specs, replacement_path) + effects_groups(indoor_vfx)
         groups = all_groups(catalog, replacement_path, parts, catch_all)
         write_meta(build_dir, build_meta(info, groups))
         output = package_mod(build_dir, out_dir)
@@ -95,6 +98,7 @@ def build(
         option_count=sum(len(g["Options"]) for g in groups),
         parts=parts,
         parts_status=parts_status,
+        indoor_vfx_count=len(indoor_vfx),
     )
 
 
@@ -115,7 +119,7 @@ def make_parser() -> argparse.ArgumentParser:
     b.add_argument("--replacement", type=Path, metavar="MDL",
                    help="use this .mdl instead of the bundled replacement model")
     b.add_argument("--refresh-parts", action="store_true",
-                   help="re-download the game path list and update the saved model parts list if it changed")
+                   help="re-download the game path list and update the saved model parts and indoor VFX lists if they changed")
     b.add_argument("-v", "--verbose", action="store_true", help="show progress and warnings")
     return parser
 

@@ -28,8 +28,9 @@ Tabs:          5
 Categories:    34
 Models:        1570
 Items:         1733
-Groups:        71 (1604 options)
+Groups:        73 (1607 options)
 Multi-part:    307 models (+697 extra part files)
+Indoor VFX:    224 effects
 Parts list:    saved file
 Skipped:       3
 Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
@@ -45,7 +46,7 @@ furniture made of several models (doors, canopy beds, partitions…), all of who
 | `--out DIR` | Write the `.pmp` to `DIR` instead of `dist/` |
 | `--cache-dir DIR` | Keep downloaded CSVs in `DIR` instead of `.cache/datamining/` |
 | `--replacement MDL` | Use your own `.mdl` instead of the bundled replacement model |
-| `--refresh-parts` | Re-download the game path list and update the saved multi-part list if it changed |
+| `--refresh-parts` | Re-download the game path list and update the saved multi-part and indoor VFX lists if they changed |
 | `-v`, `--verbose` | Show progress and warnings |
 
 After a game patch, run `python -m hide_housing build --refresh` to pick up new furniture.
@@ -67,6 +68,14 @@ python -m hide_housing build --refresh-parts
 This downloads the path list once and rewrites `model_parts.json` only if the parts changed. The
 summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit the updated file.
 
+### Indoor housing effects
+
+The *Effects: disable all* option uses a second saved list, `src/hide_housing/data/indoor_vfx.json`:
+every `.avfx` effect under `bgcommon/hou/common/vfx_hou_ind1/` in the same path list. It is
+refreshed by the same `--refresh-parts` download. Each effect is redirected to
+`vfx/path/nothing.avfx`, a file that doesn't exist, so it fails to load. That's the technique
+the [EasyEyes](https://github.com/0ceal0t/EasyEyes) plugin uses to remove effects.
+
 ## Install in Penumbra
 
 1. Open Penumbra (`/penumbra`) and go to the **Mods** tab.
@@ -80,6 +89,9 @@ summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit
      furniture item: *All flowers and plants* (everything grown from gardening seeds,
      including flowers planted in flowerpots) and *All food* (every food and drink item, served
      or eaten). These are best-guess lists and may not be perfect; see the option descriptions.
+   - **"Effects: disable all"**: one switch, *All indoor housing effects*, that turns off
+     every indoor housing visual effect (VFX) in the saved effect list. There are no individual
+     effect options.
    - **"<Tab> – <Category>"** groups: one option per item, such as *Tabletop – Lighting →
      a specific lamp*. Large categories are split into "…, Part 1", "…, Part 2" groups, because
      Penumbra allows at most 32 options per group.
