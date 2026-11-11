@@ -11,7 +11,8 @@ output: paths, groups, the replacement model, or the Penumbra format.
       with **Import...**
 - [ ] Penumbra shows **Hide Housing Furniture** with no import warnings
 - [ ] The mod is enabled for the **Default** collection (it won't work in any other)
-- [ ] Settings list every "<Tab>: hide whole categories" group first, then the "<Tab> – <Category>" groups
+- [ ] Settings list every "<Tab>: hide whole categories" group first, then "Catch-all: hide whole
+      categories", then the "<Tab> – <Category>" groups
 - [ ] No group has more than 32 options. Penumbra would warn about ignored options otherwise.
 
 ## Behaviour (inside a house with furniture placed)
@@ -36,10 +37,10 @@ house and come back in before checking the result.
 
 ## Notes
 
-- Some furniture is made of several models and may keep parts visible. That's a known general
-  limitation tracked in [#35](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/35),
-  not a test failure. Don't list individual items; report it only if a whole new kind of
-  breakage appears.
+- Multi-part furniture is hidden using the saved parts list (#40). If an item still leaves parts
+  visible, open an issue. A part missing from the list can be fixed with `--refresh-parts`. Don't
+  keep a list of individual items in this file.
+- The catch-all options (#41, #44) are best guesses. If they miss something, open an issue.
 
 ## Results
 
@@ -47,3 +48,4 @@ house and come back in before checking the result.
 |---|---|---|---|
 | 2026-11-10 | 0.1.0 | Ane Mora | Hide one category: pass. Hide one item: pass. Multi-part furniture (e.g. flower items, doors) keeps some parts visible; tracked in #35. |
 | 2026-11-10 | 0.1.0 | Ane Mora | Tiny replacement model (#15, made via Penumbra glTF export/import + Blender): works. |
+| 2026-11-10 | 0.1.0 | Ane Mora | Multi-part furniture (#40): pass, no remaining multi-part leftovers seen. Catch-all *All flowers and plants* (#41): pass. Catch-all *All food* (#44): pass. Flower Vases hide together with their flowers: pass. |
