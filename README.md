@@ -109,6 +109,27 @@ is named after the first item, the description lists the others, and hiding it h
 
 To update, build again and re-import the new `.pmp`.
 
+## Presets
+
+Ready-made settings are kept in the [`presets/`](presets/) folder, one Penumbra preset per file:
+
+| Preset | File |
+|---|---|
+| Hide Everything | [`presets/hide-everything.txt`](presets/hide-everything.txt) |
+| Rainbow Cafe | [`presets/rainbow-cafe.txt`](presets/rainbow-cafe.txt) |
+
+Penumbra can't package presets inside a mod: they're stored in Penumbra's own local database and
+shared through the clipboard. To use one:
+
+1. Open the preset file and copy its entire contents.
+2. In Penumbra, select **Hide Housing Furniture** and open its **Settings**.
+3. Use the button for importing a setting preset from the clipboard (its tooltip reads "Try to
+   import a setting preset from the clipboard.").
+4. Leave the house and come back in.
+
+Presets refer to the mod's groups and options by their IDs and names. Those stay the same across
+builds, so a preset keeps working after you update the mod, unless an option is renamed or moved.
+
 ## Limitations
 
 - Multi-part furniture is only fully hidden if all its parts are in the game path list, which only

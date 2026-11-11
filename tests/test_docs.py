@@ -40,3 +40,12 @@ def test_testing_checklist_covers_required_steps():
     checklist = (ROOT / "docs" / "testing.md").read_text(encoding="utf-8")
     for step in ["Hide one category", "Hide one item", "Everything off again"]:
         assert step in checklist
+
+
+PRESETS = {"Hide Everything": "presets/hide-everything.txt", "Rainbow Cafe": "presets/rainbow-cafe.txt"}
+
+
+def test_readme_lists_every_preset_file():
+    for name, path in PRESETS.items():
+        assert (ROOT / path).is_file(), path
+        assert f"| {name} | [`{path}`]({path}) |" in README
