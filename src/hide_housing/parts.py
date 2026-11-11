@@ -70,11 +70,57 @@ def load_parts(path: Path | str | None = None) -> Parts:
         raise ValueError(f"Saved parts list {path} is invalid: {exc}") from exc
 
 
-def refresh_parts(path: Path | str | None = None) -> tuple[Parts, bool]:
-    """Download the path list, extract the parts and save them if they changed.
+# --- Indoor housing effects (VFX) ------------------------------------------------
+# Every .avfx under bgcommon/hou/common/vfx_hou_ind1/ in the path list. Saved next
+# to the parts list and refreshed by the same refresh_parts() download (#49).
+INDOOR_VFX_PREFIX = "bgcommon/hou/common/vfx_hou_ind1/"
+INDOOR_VFX_FILENAME = "indoor_vfx.json"
 
-    Returns ``(parts, changed)``. The file is only rewritten when the extracted
-    parts differ from what is saved, so an unchanged refresh leaves it untouched.
+
+def vfx_file_for(parts_file: Path) -> Path:
+    """The saved indoor VFX list lives next to the saved parts list."""
+    return Path(parts_file).with_name(INDOOR_VFX_FILENAME)
+
+
+def extract_indoor_vfx(lines: Iterable[str]) -> list[str]:
+    """Sorted, unique ``.avfx`` game paths under ``vfx_hou_ind1``."""
+    return sorted({
+        line.strip() for line in lines
+        if line.startswith(INDOOR_VFX_PREFIX) and line.strip().endswith(".avfx")
+    })
+
+
+def load_indoor_vfx(path: Path | str | None = None) -> list[str]:
+    """Read the saved indoor VFX list (default: the one shipped with the package)."""
+    path = Path(path) if path is not None else vfx_file_for(default_parts_file())
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        vfx = data["vfx"]
+        if not isinstance(vfx, list) or not all(isinstance(p, str) for p in vfx):
+            raise TypeError("'vfx' must be a list of paths")
+        return list(vfx)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Saved indoor VFX list not found: {path}. Run the build with --refresh-parts to create it."
+        ) from None
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise ValueError(f"Saved indoor VFX list {path} is invalid: {exc}") from exc
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".json.part")
+    tmp.write_text(text, encoding="utf-8", newline="\n")
+    tmp.replace(path)
+
+
+def refresh_parts(path: Path | str | None = None) -> tuple[Parts, bool]:
+    """Download the path list once and update the saved lists that changed.
+
+    Updates the multi-part list (``path``) and the indoor VFX list next to it.
+    Returns ``(parts, changed)``; ``changed`` is true if either file was
+    rewritten. Unchanged lists are left untouched. If the download has no
+    indoor VFX, the saved VFX list is kept as it is.
     """
     path = Path(path) if path is not None else default_parts_file()
     raw = _fetch(PATH_LIST_URL)
@@ -82,17 +128,26 @@ def refresh_parts(path: Path | str | None = None) -> tuple[Parts, bool]:
         text = gzip.decompress(raw).decode("utf-8", errors="replace")
     except (OSError, EOFError) as exc:
         raise DownloadError(f"Could not read {PATH_LIST_URL}: {exc}") from exc
-    parts = extract_parts(text.splitlines())
+    lines = text.splitlines()
+    parts = extract_parts(lines)
     if not parts:
         raise DownloadError(f"{PATH_LIST_URL} contained no furniture model parts; not saving")
 
     try:
-        changed = load_parts(path) != parts
+        parts_changed = load_parts(path) != parts
     except (FileNotFoundError, ValueError):
-        changed = True
-    if changed:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".json.part")
-        tmp.write_text(_to_json(parts), encoding="utf-8", newline="\n")
-        tmp.replace(path)
-    return parts, changed
+        parts_changed = True
+    if parts_changed:
+        _write(path, _to_json(parts))
+
+    vfx = extract_indoor_vfx(lines)
+    vfx_path = vfx_file_for(path)
+    vfx_changed = False
+    if vfx:
+        try:
+            vfx_changed = load_indoor_vfx(vfx_path) != vfx
+        except (FileNotFoundError, ValueError):
+            vfx_changed = True
+        if vfx_changed:
+            _write(vfx_path, json.dumps({"source": PATH_LIST_URL, "vfx": vfx}, indent=2) + "\n")
+    return parts, parts_changed or vfx_changed

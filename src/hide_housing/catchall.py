@@ -95,6 +95,35 @@ def food_model_paths(model_keys: Iterable[int], parts: Mapping[int, Sequence[str
     return paths
 
 
+# --- Effects (VFX) -----------------------------------------------------------
+# Each indoor housing effect is redirected to a game path that doesn't exist, so it
+# fails to load and isn't drawn. That's the technique the EasyEyes plugin uses to
+# remove effects; Penumbra's Resource Logger exempts this exact path from its
+# load-failure warnings for that reason (Penumbra ResourceWatcher.cs).
+NO_VFX_PATH = "vfx/path/nothing.avfx"
+EFFECTS_GROUP_NAME = "Effects: disable all"
+EFFECTS_GROUP_PRIORITY = 0
+INDOOR_VFX_OPTION_NAME = "All indoor housing effects"
+INDOOR_VFX_DESCRIPTION = (
+    "Disables every indoor housing visual effect (VFX) in the saved list by redirecting it to a "
+    "file that doesn't exist, the same technique the EasyEyes plugin uses. The list comes from the "
+    "ResLogger2 game path list and may not be complete."
+)
+
+
+def effects_groups(indoor_vfx: Sequence[str]) -> list[dict[str, Any]]:
+    """One Multi group with a single option that disables every listed indoor VFX."""
+    if not indoor_vfx:
+        return []
+    swaps = {path: NO_VFX_PATH for path in indoor_vfx}
+    return [multi_group(
+        EFFECTS_GROUP_NAME,
+        [option(EFFECTS_GROUP_NAME, INDOOR_VFX_OPTION_NAME, {}, INDOOR_VFX_DESCRIPTION, file_swaps=swaps)],
+        EFFECTS_GROUP_PRIORITY,
+        "Turn off housing visual effects.",
+    )]
+
+
 # --- Group ----------------------------------------------------------------------
 
 def catch_all_option_specs(

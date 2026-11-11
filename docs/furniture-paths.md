@@ -190,3 +190,22 @@ loading `han_f4_m0001.mdl` and `han_f4_m0003.mdl` from their own furniture folde
 already extra parts in the saved multi-part list (#40), so hiding the vase hides its flowers.
 Picture-frame contents and the display vases (UsageType 12) weren't traced. Aquarium fish and
 mannequin gear are out of scope: they are separate items, not part of the furniture.
+
+## Indoor housing effects (#49)
+
+**Datamining can't link housing items to VFX.** None of the 8,027 `csv/en` sheets connect
+furniture to effect files. `VFX.csv` holds character and monster effects, and `ExportedSG` lists
+only 8 housing scene files. The link lives inside each item's scene file (`.sgb`), which Lumina
+can parse (`LayerEntryType.VFX`, `LineVFX`), but that needs the user's game files.
+
+**Implemented approach (user's choice):** one bulk option that disables **every** effect under
+`bgcommon/hou/common/vfx_hou_ind1/`, with no per-effect options.
+- **Effect list:** taken from the ResLogger2 path list (224 `.avfx` files on 2026-11-10) and saved
+  in `src/hide_housing/data/indoor_vfx.json`. It is refreshed together with the multi-part list
+  by `build --refresh-parts`.
+- **How:** each effect is a Penumbra `FileSwaps` entry to `vfx/path/nothing.avfx`, a path that
+  doesn't exist, so the load fails. EasyEyes rewrites effect paths to this same path to remove
+  effects (`EasyEyes/ResourceLoader.cs`), and Penumbra's Resource Logger exempts it from
+  load-failure warnings for that reason (`Penumbra/UI/ResourceWatcher/ResourceWatcher.cs`).
+  Doing it through a Penumbra file swap instead of EasyEyes' hook still needs to be confirmed in
+  game.

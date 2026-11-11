@@ -140,3 +140,22 @@ def test_hide_files_include_extra_parts():
     files = hide_files([FurnitureModel(405, [(1, "Door")]), FurnitureModel(7, [(2, "Chair")])],
                        "files\\replacement.mdl", {405: ["fun_b0_m0405a.mdl"]})
     assert set(files) == {model_path(405), f"{GENERAL}/0405/bgparts/fun_b0_m0405a.mdl", model_path(7)}
+
+
+def test_refresh_saves_indoor_vfx_next_to_parts_and_keeps_it_when_download_has_none(tmp_path, monkeypatch):
+    saved = tmp_path / "model_parts.json"
+    vfx_line = "bgcommon/hou/common/vfx_hou_ind1/eff/i_fire0001_o.avfx\n"
+    monkeypatch.setattr(parts_mod, "_fetch", lambda url: gz(PATH_LIST + vfx_line))
+    _, changed = refresh_parts(saved)
+    assert changed
+    assert parts_mod.load_indoor_vfx(tmp_path / "indoor_vfx.json") == [vfx_line.strip()]
+
+    # Same download again: nothing changes.
+    _, changed = refresh_parts(saved)
+    assert not changed
+
+    # A download without indoor VFX keeps the saved VFX list.
+    monkeypatch.setattr(parts_mod, "_fetch", lambda url: gz(PATH_LIST))
+    _, changed = refresh_parts(saved)
+    assert not changed
+    assert parts_mod.load_indoor_vfx(tmp_path / "indoor_vfx.json") == [vfx_line.strip()]

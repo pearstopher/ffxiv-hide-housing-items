@@ -29,6 +29,8 @@ output: paths, groups, the replacement model, or the Penumbra format.
       flowerpots disappear and the pots stay.
 - [ ] **Catch-all food:** turn on *Catch-all → All food*. All food disappears, both served and
       eaten.
+- [ ] **Effects:** turn on *Effects: disable all → All indoor housing effects*. Indoor housing
+      effects stop showing, and nothing errors or crashes.
 - [ ] **Overlap:** turn on a category and one of its items together. The item stays hidden and
       nothing errors.
 

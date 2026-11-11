@@ -45,7 +45,8 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
 
     summary = capsys.readouterr().out
     for line in ["Tabs:          3", "Categories:    3", "Models:        3", "Items:         4",
-                 "Groups:        7 (7 options)", "Skipped:       0", "Parts list:    saved file",
+                 "Groups:        8 (8 options)", "Indoor VFX:    224 effects",
+                 "Skipped:       0", "Parts list:    saved file",
                  f"Output:        {pmp.resolve()}"]:
         assert line in summary
 
@@ -105,6 +106,7 @@ def test_multi_part_models_get_every_part_from_saved_list(tmp_path, cache, no_ne
     saved = tmp_path / "model_parts.json"
     saved.write_text(json.dumps({"parts": {"0633": ["fun_b0_m0633a.mdl", "fun_b0_m0633b.mdl"]}}),
                      encoding="utf-8")
+    (tmp_path / "indoor_vfx.json").write_text(json.dumps({"vfx": []}), encoding="utf-8")
     monkeypatch.setattr("hide_housing.parts.default_parts_file", lambda: saved)
     out = tmp_path / "dist"
     assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
@@ -123,13 +125,19 @@ def test_refresh_parts_flag_updates_saved_file(tmp_path, cache, capsys, monkeypa
     from hide_housing import parts
     saved = tmp_path / "model_parts.json"
     monkeypatch.setattr(parts, "default_parts_file", lambda: saved)
-    listing = "bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633a.mdl\n"
+    listing = ("bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633a.mdl\n"
+               "bgcommon/hou/common/vfx_hou_ind1/eff/i_fire0001_o.avfx\n")
     monkeypatch.setattr(parts, "_fetch", lambda url: gzip.compress(listing.encode()))
 
     args = ["build", "--refresh-parts", "--cache-dir", str(cache), "--out", str(tmp_path / "d")]
     assert cli.main(args) == 0
-    assert "Parts list:    refreshed, saved file updated" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "Parts list:    refreshed, saved file updated" in out
+    assert "Indoor VFX:    1 effects" in out
     assert json.loads(saved.read_text())["parts"] == {"0633": ["fun_b0_m0633a.mdl"]}
+    assert json.loads((tmp_path / "indoor_vfx.json").read_text())["vfx"] == [
+        "bgcommon/hou/common/vfx_hou_ind1/eff/i_fire0001_o.avfx"
+    ]
 
     assert cli.main(args) == 0
     assert "Parts list:    refreshed, no changes" in capsys.readouterr().out

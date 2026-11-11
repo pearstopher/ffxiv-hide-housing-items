@@ -4,10 +4,13 @@ from hide_housing import penumbra
 from hide_housing.catalog import load_catalog
 from hide_housing.catchall import (
     CATCH_ALL_GROUP_NAME,
+    EFFECTS_GROUP_NAME,
     FOOD_OPTION_NAME,
+    NO_VFX_PATH,
     PLANTS_OPTION_NAME,
     catch_all_groups,
     catch_all_option_specs,
+    effects_groups,
     food_model_paths,
     load_food_model_keys,
     load_garden_seeds,
@@ -15,6 +18,7 @@ from hide_housing.catchall import (
 )
 from hide_housing.groups import all_groups
 from hide_housing.meta import ModInfo, build_meta
+from hide_housing.parts import extract_indoor_vfx, load_indoor_vfx
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 SHEETS = ("HousingFurniture", "FurnitureCatalogItemList", "FurnitureCatalogCategory", "Item")
@@ -135,3 +139,41 @@ def test_catch_all_group_has_plants_and_food_and_nothing_individual(tmp_path):
 def test_shipped_fixture_has_no_food_so_no_food_option():
     specs = catch_all_option_specs(None, FIXTURES / "HousingFurniture.csv")
     assert specs == []
+
+
+# --- indoor VFX (#49) ---------------------------------------------------------------
+
+VFX = "bgcommon/hou/common/vfx_hou_ind1/eff"
+
+
+def test_extract_indoor_vfx_only_vfx_hou_ind1_avfx():
+    lines = [
+        f"{VFX}/i_fire0001_o.avfx",
+        f"{VFX}/i_fire0001_o.avfx",
+        f"{VFX}/i_fire0001_o.atex",
+        "bgcommon/hou/common/vfx_hou_out1/eff/o_fire0001_o.avfx",
+        "bgcommon/hou/common/vfx_hou_com1/eff/bl_stop01l_o.avfx",
+        f"{VFX}/a_light001_y.avfx",
+    ]
+    assert extract_indoor_vfx(lines) == [f"{VFX}/a_light001_y.avfx", f"{VFX}/i_fire0001_o.avfx"]
+
+
+def test_shipped_indoor_vfx_list():
+    vfx = load_indoor_vfx()
+    assert len(vfx) >= 200
+    assert vfx == sorted(set(vfx))
+    assert all(p.startswith("bgcommon/hou/common/vfx_hou_ind1/") and p.endswith(".avfx") for p in vfx)
+
+
+def test_effects_group_is_one_bulk_option_using_file_swaps():
+    (group,) = effects_groups([f"{VFX}/a.avfx", f"{VFX}/b.avfx"])
+    assert group["Name"] == EFFECTS_GROUP_NAME
+    assert group["Type"] == "Multi" and group["DefaultSettings"] == penumbra.ALL_OPTIONS_OFF
+    (opt,) = group["Options"]
+    assert opt["Files"] == {}
+    assert opt["FileSwaps"] == {f"{VFX}/a.avfx": NO_VFX_PATH, f"{VFX}/b.avfx": NO_VFX_PATH}
+    assert "may not be complete" in opt["Description"]
+
+
+def test_no_effects_group_without_vfx():
+    assert effects_groups([]) == []
