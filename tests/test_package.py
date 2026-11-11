@@ -4,6 +4,7 @@ from pathlib import Path, PureWindowsPath
 
 import pytest
 
+from hide_housing import __version__
 from hide_housing.assets import bundle_replacement
 from hide_housing.catalog import load_catalog
 from hide_housing.groups import all_groups
@@ -23,7 +24,7 @@ def make_build(build_dir, info=ModInfo()):
 
 def test_pmp_contents_are_valid_and_complete(tmp_path):
     pmp = package_mod(make_build(tmp_path / "build"), tmp_path / "dist")
-    assert pmp == tmp_path / "dist" / "hide-housing-furniture-0.1.0.pmp"
+    assert pmp == tmp_path / "dist" / f"hide-housing-furniture-{__version__}.pmp"
 
     with zipfile.ZipFile(pmp) as archive:
         names = set(archive.namelist())
@@ -87,7 +88,7 @@ def test_referenced_files_normalises_backslashes():
 
 
 @pytest.mark.parametrize("name, version, expected", [
-    ("Hide Housing Furniture", "0.1.0", "hide-housing-furniture-0.1.0.pmp"),
+    ("Hide Housing Furniture", "2.3.4", "hide-housing-furniture-2.3.4.pmp"),
     ("  Weird/Name: v2!  ", "1.0 beta", "weird-name-v2-1.0-beta.pmp"),
     ("", "", "mod-0.pmp"),
 ])

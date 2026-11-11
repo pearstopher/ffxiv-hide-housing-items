@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hide-housing"
-version = "0.1.0"
+version = "1.0.0"
 description = "Generate a Penumbra mod that hides FFXIV indoor housing furniture."
 readme = "README.md"
 license = "Unlicense"

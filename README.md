@@ -33,7 +33,7 @@ Multi-part:    307 models (+697 extra part files)
 Housing VFX:   281 effects
 Parts list:    saved file
 Skipped:       3
-Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
+Output:        ...\dist\hide-housing-furniture-1.0.0.pmp
 ```
 
 "Skipped" lists furniture rows that have no item name in the game data. "Multi-part" counts
