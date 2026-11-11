@@ -24,6 +24,10 @@ output: paths, groups, the replacement model, or the Penumbra format.
 - [ ] **Everything off again:** turn every option off. All furniture returns to normal.
 - [ ] **Multi-part furniture:** hide a partition door and a canopy bed. Every part disappears
       (door and frame, bed and canopy).
+- [ ] **Catch-all flowers:** turn on *Catch-all → All flowers and plants*. Flowers planted in
+      flowerpots disappear and the pots stay.
+- [ ] **Catch-all food:** turn on *Catch-all → All food*. All food disappears, both served and
+      eaten.
 - [ ] **Overlap:** turn on a category and one of its items together. The item stays hidden and
       nothing errors.
 

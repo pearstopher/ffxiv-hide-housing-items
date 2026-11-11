@@ -77,9 +77,9 @@ summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit
    - **"<Tab>: hide whole categories"** groups (listed first): one option per category, such
      as *Tabletop: hide whole categories → Lighting*.
    - **"Catch-all: hide whole categories"**: single switches for things that aren't one
-     furniture item, e.g. *All flowers and plants* (everything grown from gardening seeds,
-     including flowers planted in flowerpots). These are best-guess lists and may not be
-     perfect; see the option descriptions.
+     furniture item: *All flowers and plants* (everything grown from gardening seeds,
+     including flowers planted in flowerpots) and *All food* (every food and drink item, served
+     or eaten). These are best-guess lists and may not be perfect; see the option descriptions.
    - **"<Tab> – <Category>"** groups: one option per item, such as *Tabletop – Lighting →
      a specific lamp*. Large categories are split into "…, Part 1", "…, Part 2" groups, because
      Penumbra allows at most 32 options per group.

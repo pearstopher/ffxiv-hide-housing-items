@@ -177,6 +177,14 @@ every flowerpot.
 - **Outdoors:** outdoor garden plots use the same models, so they may be hidden there too.
 - **No per-flower options,** by request.
 
+**Implemented in #44: one catch-all option, "All food" (best guess).**
+- **Which models:** datamined. `HousingFurniture` rows with `UsageType` 7, currently 98 models.
+- **Which files:** for each model, the main `fun_b0_m{NNNN}.mdl`, plus `…a.mdl` and `…b.mdl` (food
+  has two states, served and eaten), plus any extra parts in the saved multi-part list (#40).
+  That's 326 paths, covering all 247 food model files in the ResLogger2 list plus 79 guessed
+  states. ResLogger2 was approved by the user for plant and food model guesses only.
+- **No per-food options in the catch-all,** by request.
+
 **Vase flowers:** the user's capture showed the Riviera and Glade *Flower Vase* (keys 0143, 0145)
 loading `han_f4_m0001.mdl` and `han_f4_m0003.mdl` from their own furniture folders. Those are
 already extra parts in the saved multi-part list (#40), so hiding the vase hides its flowers.

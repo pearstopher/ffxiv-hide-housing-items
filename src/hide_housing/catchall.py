@@ -8,11 +8,12 @@ model guesses) and nothing else. See docs/furniture-paths.md.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
 from hide_housing.meta import multi_group, option
+from hide_housing.paths import model_paths
 from hide_housing.sheets import read_sheet, to_bool
 
 CATCH_ALL_GROUP_NAME = "Catch-all: hide whole categories"
@@ -63,10 +64,43 @@ def plant_model_paths(seeds: Mapping[int, bool]) -> list[str]:
     return paths
 
 
+# --- Food -----------------------------------------------------------------------
+# Food is furniture with HousingFurniture.UsageType 7 (datamined). Best guess per
+# model: the main fun_b0_m{NNNN}.mdl plus "a" and "b" parts (food has two states:
+# served and eaten), plus any extra parts in the saved multi-part list (#40).
+FOOD_USAGE_TYPE = 7
+FOOD_STATE_SUFFIXES = ("a", "b")
+
+FOOD_OPTION_NAME = "All food"
+FOOD_DESCRIPTION = "Hides every food and drink furniture item, served or eaten. " + BEST_GUESS_NOTE
+
+
+def load_food_model_keys(path: Path | str) -> list[int]:
+    """Model keys of food furniture (UsageType 7) from the datamined HousingFurniture sheet."""
+    rows = read_sheet(path, {"Item": int, "ModelKey": int, "UsageType": int})
+    return sorted({
+        row["ModelKey"] for row in rows.values()
+        if row["Item"] and row["ModelKey"] and row["UsageType"] == FOOD_USAGE_TYPE
+    })
+
+
+def food_model_paths(model_keys: Iterable[int], parts: Mapping[int, Sequence[str]] | None = None) -> list[str]:
+    """Best-guess model paths for every food model key."""
+    parts = parts or {}
+    paths: list[str] = []
+    for key in model_keys:
+        guesses = [f"fun_b0_m{key:04d}{suffix}.mdl" for suffix in FOOD_STATE_SUFFIXES]
+        extras = sorted(set(guesses) | set(parts.get(key, ())))
+        paths += model_paths(key, extras)
+    return paths
+
+
 # --- Group ----------------------------------------------------------------------
 
 def catch_all_option_specs(
-    garden_seeds_path: Path | str | None,
+    garden_seeds_path: Path | str | None = None,
+    furniture_path: Path | str | None = None,
+    parts: Mapping[int, Sequence[str]] | None = None,
 ) -> list[tuple[str, list[str], str]]:
     """``[(option name, game paths, description)]`` for every catch-all with data."""
     specs: list[tuple[str, list[str], str]] = []
@@ -74,6 +108,10 @@ def catch_all_option_specs(
         plant_paths = plant_model_paths(load_garden_seeds(garden_seeds_path))
         if plant_paths:
             specs.append((PLANTS_OPTION_NAME, plant_paths, PLANTS_DESCRIPTION))
+    if furniture_path is not None:
+        food_paths = food_model_paths(load_food_model_keys(furniture_path), parts)
+        if food_paths:
+            specs.append((FOOD_OPTION_NAME, food_paths, FOOD_DESCRIPTION))
     return specs
 
 

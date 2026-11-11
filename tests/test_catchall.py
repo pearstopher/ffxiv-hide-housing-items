@@ -4,9 +4,12 @@ from hide_housing import penumbra
 from hide_housing.catalog import load_catalog
 from hide_housing.catchall import (
     CATCH_ALL_GROUP_NAME,
+    FOOD_OPTION_NAME,
     PLANTS_OPTION_NAME,
     catch_all_groups,
     catch_all_option_specs,
+    food_model_paths,
+    load_food_model_keys,
     load_garden_seeds,
     plant_model_paths,
 )
@@ -80,3 +83,55 @@ def test_no_individual_flower_options_and_bulk_groups_come_first():
 def test_no_catch_all_without_data():
     assert catch_all_option_specs(None) == []
     assert catch_all_groups([], REPLACEMENT) == []
+
+
+# --- food (#44) -------------------------------------------------------------------
+
+GENERAL = "bgcommon/hou/indoor/general"
+FURNITURE_CSV = (
+    "#,UsageParameter,CustomTalk,Item,ModelKey,HousingItemCategory,UsageType,PlaceLimitType,"
+    "AquariumTier,Placement,Unplacement,UnplacementStorage,DestroyOnRemoval,Unknown4,Unknown5,Unknown6\n"
+    "196608,0,0,0,0,0,0,0,0,0,0,0,False,False,False,False\n"
+    "196609,0,0,6601,1,13,0,0,0,0,0,0,False,False,True,False\n"       # table: not food
+    "196857,1,0,8000,249,14,7,0,0,0,0,0,False,False,True,False\n"     # Gourmet Lunch: food
+    "196858,22,0,8001,219,14,7,0,0,0,0,0,False,False,True,False\n"    # High House Supper Set: food
+    "196859,2,0,0,250,14,7,0,0,0,0,0,False,False,False,False\n"       # unused row: skipped
+)
+
+
+def write_furniture(tmp_path):
+    path = tmp_path / "HousingFurniture.csv"
+    path.write_bytes(FURNITURE_CSV.encode())
+    return path
+
+
+def test_food_keys_come_from_datamined_usage_type(tmp_path):
+    assert load_food_model_keys(write_furniture(tmp_path)) == [219, 249]
+
+
+def test_food_paths_main_plus_both_states_plus_saved_parts():
+    paths = food_model_paths([249, 253], {253: ["fun_b0_m0253c.mdl"]})
+    assert paths == [
+        f"{GENERAL}/0249/bgparts/fun_b0_m0249.mdl",
+        f"{GENERAL}/0249/bgparts/fun_b0_m0249a.mdl",
+        f"{GENERAL}/0249/bgparts/fun_b0_m0249b.mdl",
+        f"{GENERAL}/0253/bgparts/fun_b0_m0253.mdl",
+        f"{GENERAL}/0253/bgparts/fun_b0_m0253a.mdl",
+        f"{GENERAL}/0253/bgparts/fun_b0_m0253b.mdl",
+        f"{GENERAL}/0253/bgparts/fun_b0_m0253c.mdl",
+    ]
+
+
+def test_catch_all_group_has_plants_and_food_and_nothing_individual(tmp_path):
+    specs = catch_all_option_specs(FIXTURES / "GardeningSeed.csv", write_furniture(tmp_path))
+    (group,) = catch_all_groups(specs, REPLACEMENT)
+    assert [o["Name"] for o in group["Options"]] == [PLANTS_OPTION_NAME, FOOD_OPTION_NAME]
+    food = group["Options"][1]
+    assert "may not catch every model" in food["Description"]
+    assert len(food["Files"]) == 2 * 3
+    assert group["DefaultSettings"] == penumbra.ALL_OPTIONS_OFF
+
+
+def test_shipped_fixture_has_no_food_so_no_food_option():
+    specs = catch_all_option_specs(None, FIXTURES / "HousingFurniture.csv")
+    assert specs == []

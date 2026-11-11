@@ -81,7 +81,10 @@ def build(
     with tempfile.TemporaryDirectory(prefix="hide_housing_build_") as tmp:
         build_dir = Path(tmp)
         replacement_path = bundle_replacement(build_dir, replacement)
-        catch_all = catch_all_groups(catch_all_option_specs(sheet_paths.get("GardeningSeed")), replacement_path)
+        specs = catch_all_option_specs(
+            sheet_paths.get("GardeningSeed"), sheet_paths.get("HousingFurniture"), parts
+        )
+        catch_all = catch_all_groups(specs, replacement_path)
         groups = all_groups(catalog, replacement_path, parts, catch_all)
         write_meta(build_dir, build_meta(info, groups))
         output = package_mod(build_dir, out_dir)
