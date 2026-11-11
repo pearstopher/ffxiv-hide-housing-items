@@ -133,9 +133,9 @@ builds, so a preset keeps working after you update the mod, unless an option is 
 ## Limitations
 
 - Multi-part furniture is only fully hidden if all its parts are in the game path list, which only
-  includes files players have loaded. Content shown *in* furniture (e.g. flowers planted in a
-  flowerpot) belongs to a different item and isn't hidden
-  ([#41](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/41)).
+  includes files players have loaded.
+- Flowers planted in flowerpots belong to the seed, not the pot, so hiding a flowerpot doesn't hide
+  them. Use *Miscellaneous → All flowers and plants* for that.
 - Indoor furniture only. Outdoor (yard) furniture is not included.
 
 ## Development
@@ -147,3 +147,16 @@ pytest
 - In-game test checklist: [docs/testing.md](docs/testing.md)
 - How furniture maps to game files: [docs/furniture-paths.md](docs/furniture-paths.md)
 - Penumbra mod format notes: [docs/penumbra-format.md](docs/penumbra-format.md)
+
+## Licence
+
+This project is released into the **public domain** under [The Unlicense](LICENSE). Anyone may
+copy, modify, publish, use or distribute it, for any purpose, with no credit required.
+
+This only covers the project's own work: the generator code, tests, docs and presets. It doesn't
+cover Square Enix's material that the mod is built from or contains: game file paths, item names,
+the datamined data, and the replacement model, which was made from an exported game model.
+
+This project is not affiliated with or endorsed by Square Enix. FINAL FANTASY XIV is © SQUARE ENIX
+CO., LTD. Square Enix's position is that third-party tools and mods are prohibited by the FINAL
+FANTASY XIV terms of service, so use this mod at your own risk.

@@ -67,3 +67,12 @@ def test_preset_files_are_valid_penumbra_presets():
             assert group["Identifier"] and group["Name"]
             for option in group.get("Options", []):
                 assert option["State"] in ("Enabled", "Disabled")
+
+
+def test_unlicense_is_set_up():
+    licence = (ROOT / "LICENSE").read_text(encoding="utf-8")
+    assert licence.startswith("This is free and unencumbered software released into the public domain.")
+    assert "<https://unlicense.org>" in licence
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'license = "Unlicense"' in pyproject
+    assert "[The Unlicense](LICENSE)" in README
