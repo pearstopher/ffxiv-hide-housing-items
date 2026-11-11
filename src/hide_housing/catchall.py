@@ -99,12 +99,7 @@ NO_VFX_PATH = "vfx/path/nothing.avfx"
 HOUSING_VFX_OPTION_NAME = "All housing effects"
 # Stable option ID key (the option's first name, from #49).
 HOUSING_VFX_OPTION_ID_KEY = "All indoor housing effects"
-HOUSING_VFX_DESCRIPTION = (
-    "Disables housing visual effects (VFX): every effect in the saved list from the indoor, "
-    "dynamic, common and workshop housing effect folders (not outdoor), by redirecting it to a "
-    "file that doesn't exist, the same technique the EasyEyes plugin uses. The list comes from the "
-    "ResLogger2 game path list and may not be complete."
-)
+HOUSING_VFX_DESCRIPTION = "Disables all housing visual effects (best guess, may miss some)."
 
 
 # --- Group ----------------------------------------------------------------------
@@ -153,5 +148,5 @@ def misc_groups(
         MISC_GROUP_NAME,
         options,
         MISC_GROUP_PRIORITY,
-        "Hide whole kinds of things at once. Some lists are best guesses.",
+        "Hide whole kinds of things at once (some lists are best guesses).",
     )]

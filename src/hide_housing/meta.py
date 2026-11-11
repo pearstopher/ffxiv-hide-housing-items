@@ -33,10 +33,7 @@ def stable_id(*parts: str) -> str:
 class ModInfo:
     name: str = "Hide Housing Furniture"
     author: str | None = "Ane Mora"
-    description: str = (
-        "Hide any indoor housing furniture, by whole category or item by item. "
-        "Nothing is hidden until you enable options."
-    )
+    description: str = "Hide indoor housing furniture by category or item (nothing is hidden by default)."
     version: str = __version__
     website: str | None = "https://github.com/pearstopher/ffxiv-hide-housing-items"
 

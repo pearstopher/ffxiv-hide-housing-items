@@ -5,7 +5,9 @@ import pytest
 from hide_housing import penumbra
 from hide_housing.catalog import Catalog, FurnitureModel, Subcategory, TopLevel, load_catalog
 from hide_housing.groups import (
+    MAX_DESCRIPTION_LENGTH,
     all_groups,
+    also_hides_description,
     category_groups,
     hide_files,
     item_groups,
@@ -193,3 +195,25 @@ def test_single_category_specs_make_an_all_option_per_single_category_tab():
     assert single_category_specs(Catalog(tops), REPLACEMENT) == [
         ("All rugs", [model_path(3), model_path(4)], "Hides all rugs."),
     ]
+
+
+# --- description length (#55) ---------------------------------------------------
+
+
+def test_also_hides_lists_all_names_when_short():
+    assert also_hides_description(["Jumbo Sheep Dolls"]) == "Also hides: Jumbo Sheep Dolls (same model)."
+    assert also_hides_description([]) == ""
+
+
+def test_also_hides_summarises_long_lists_in_one_short_sentence():
+    names = [f"Material Supplier Permit A-{i}" for i in range(30)]
+    text = also_hides_description(names)
+    assert len(text) <= MAX_DESCRIPTION_LENGTH
+    assert text.startswith("Also hides: Material Supplier Permit A-0, ")
+    shown = text.count("Permit")
+    assert text.endswith(f" and {30 - shown} more (same model).")
+
+
+def test_also_hides_with_one_very_long_name():
+    text = also_hides_description(["X" * 200, "Y"])
+    assert text == "Also hides 2 other items (same model)."
