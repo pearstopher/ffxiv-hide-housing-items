@@ -12,6 +12,7 @@ SHEETS = (
     "FurnitureCatalogCategory",
     "HousingFurniture",
     "Item",
+    "GardeningSeed",
 )
 DEFAULT_CACHE_DIR = Path(".cache") / "datamining"
 TIMEOUT_SECONDS = 60

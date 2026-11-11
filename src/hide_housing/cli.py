@@ -13,6 +13,7 @@ from pathlib import Path
 from hide_housing import __version__
 from hide_housing.assets import bundle_replacement
 from hide_housing.catalog import Catalog, load_catalog
+from hide_housing.catchall import catch_all_groups, catch_all_option_specs
 from hide_housing.download import DEFAULT_CACHE_DIR, DownloadError, download_sheets
 from hide_housing.groups import all_groups
 from hide_housing.meta import ModInfo, build_meta, write_meta
@@ -80,7 +81,8 @@ def build(
     with tempfile.TemporaryDirectory(prefix="hide_housing_build_") as tmp:
         build_dir = Path(tmp)
         replacement_path = bundle_replacement(build_dir, replacement)
-        groups = all_groups(catalog, replacement_path, parts)
+        catch_all = catch_all_groups(catch_all_option_specs(sheet_paths.get("GardeningSeed")), replacement_path)
+        groups = all_groups(catalog, replacement_path, parts, catch_all)
         write_meta(build_dir, build_meta(info, groups))
         output = package_mod(build_dir, out_dir)
     return BuildResult(

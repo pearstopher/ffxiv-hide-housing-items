@@ -45,7 +45,7 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
 
     summary = capsys.readouterr().out
     for line in ["Tabs:          3", "Categories:    3", "Models:        3", "Items:         4",
-                 "Groups:        6 (6 options)", "Skipped:       0", "Parts list:    saved file",
+                 "Groups:        7 (7 options)", "Skipped:       0", "Parts list:    saved file",
                  f"Output:        {pmp.resolve()}"]:
         assert line in summary
 
