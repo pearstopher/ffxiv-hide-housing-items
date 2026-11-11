@@ -70,10 +70,11 @@ summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit
 
 ### Housing effects
 
-The *Effects: disable all* option uses a second saved list, `src/hide_housing/data/housing_vfx.json`:
-every `.avfx` effect in the same path list under these `bgcommon/hou/common/` folders:
-`vfx_hou_ind1`, `vfx_hou_dyna1`, `vfx_hou_com1` and `vfx_hou_craft1`. The outdoor folder,
-`vfx_hou_out1`, is not included. The list is refreshed by the same `--refresh-parts` download. Each effect is redirected to
+The *Miscellaneous → All housing effects* option uses a second saved list,
+`src/hide_housing/data/housing_vfx.json`: every `.avfx` effect in the same path list under these
+`bgcommon/hou/common/` folders: `vfx_hou_ind1`, `vfx_hou_dyna1`, `vfx_hou_com1` and
+`vfx_hou_craft1`. The outdoor folder, `vfx_hou_out1`, is not included. The list is refreshed by
+the same `--refresh-parts` download. Each effect is redirected to
 `vfx/path/nothing.avfx`, a file that doesn't exist, so it fails to load. That's the technique
 the [EasyEyes](https://github.com/0ceal0t/EasyEyes) plugin uses to remove effects.
 
@@ -84,15 +85,19 @@ the [EasyEyes](https://github.com/0ceal0t/EasyEyes) plugin uses to remove effect
 3. Select **Hide Housing Furniture**, enable it for the **Default** collection (it won't work in
    any other collection), and open its **Settings**.
 4. Turn on what you want to hide:
-   - **"<Tab>: hide whole categories"** groups (listed first): one option per category, such
-     as *Tabletop: hide whole categories → Lighting*.
-   - **"Catch-all: hide whole categories"**: single switches for things that aren't one
-     furniture item: *All flowers and plants* (everything grown from gardening seeds,
-     including flowers planted in flowerpots) and *All food* (every food and drink item, served
-     or eaten). These are best-guess lists and may not be perfect; see the option descriptions.
-   - **"Effects: disable all"**: one switch, *All housing effects*, that turns off every
-     housing visual effect (VFX) in the saved effect list (see [Housing effects](#housing-effects)).
-     There are no individual effect options.
+   - **"<Tab>: Hide Categories"** groups (listed first): one option per category, such as
+     *Tabletop: Hide Categories → Lighting*. Rugs has only one category, so it is in
+     Miscellaneous instead.
+   - **"Miscellaneous"**: single switches that each hide a whole kind of thing, with no
+     individual options:
+     - *All rugs*
+     - *All flowers and plants*: everything grown from gardening seeds, including flowers
+       planted in flowerpots
+     - *All food*: every food and drink item, served or eaten
+     - *All housing effects*: every housing visual effect (VFX) in the saved effect list (see
+       [Housing effects](#housing-effects))
+
+     The flowers, food and effects lists are best guesses and may not be perfect.
    - **"<Tab> – <Category>"** groups: one option per item, such as *Tabletop – Lighting →
      a specific lamp*. Large categories are split into "…, Part 1", "…, Part 2" groups, because
      Penumbra allows at most 32 options per group.
