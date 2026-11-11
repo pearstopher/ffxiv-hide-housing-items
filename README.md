@@ -1,5 +1,7 @@
 # FFXIV Hide Housing Items
 
+*commissioned by Reaper Grimm' in exchange for all of his gil in perpetuity*
+
 Generates a [Penumbra](https://github.com/xivdev/Penumbra) mod (`.pmp`) that lets you hide indoor
 housing furniture, either a whole category at once or item by item. The furniture list comes
 straight from the latest [datamining](https://github.com/xivapi/ffxiv-datamining), so a rebuild
