@@ -70,28 +70,34 @@ def load_parts(path: Path | str | None = None) -> Parts:
         raise ValueError(f"Saved parts list {path} is invalid: {exc}") from exc
 
 
-# --- Indoor housing effects (VFX) ------------------------------------------------
-# Every .avfx under bgcommon/hou/common/vfx_hou_ind1/ in the path list. Saved next
-# to the parts list and refreshed by the same refresh_parts() download (#49).
-INDOOR_VFX_PREFIX = "bgcommon/hou/common/vfx_hou_ind1/"
-INDOOR_VFX_FILENAME = "indoor_vfx.json"
+# --- Housing effects (VFX) -------------------------------------------------------
+# Every .avfx under these bgcommon/hou/common/ folders in the path list (#49, #51).
+# vfx_hou_out1 (outdoor) is deliberately not included. Saved next to the parts
+# list and refreshed by the same refresh_parts() download.
+VFX_FOLDERS = (
+    "bgcommon/hou/common/vfx_hou_ind1/",
+    "bgcommon/hou/common/vfx_hou_dyna1/",
+    "bgcommon/hou/common/vfx_hou_com1/",
+    "bgcommon/hou/common/vfx_hou_craft1/",
+)
+HOUSING_VFX_FILENAME = "housing_vfx.json"
 
 
 def vfx_file_for(parts_file: Path) -> Path:
-    """The saved indoor VFX list lives next to the saved parts list."""
-    return Path(parts_file).with_name(INDOOR_VFX_FILENAME)
+    """The saved housing VFX list lives next to the saved parts list."""
+    return Path(parts_file).with_name(HOUSING_VFX_FILENAME)
 
 
-def extract_indoor_vfx(lines: Iterable[str]) -> list[str]:
-    """Sorted, unique ``.avfx`` game paths under ``vfx_hou_ind1``."""
+def extract_housing_vfx(lines: Iterable[str]) -> list[str]:
+    """Sorted, unique ``.avfx`` game paths under any of ``VFX_FOLDERS``."""
     return sorted({
-        line.strip() for line in lines
-        if line.startswith(INDOOR_VFX_PREFIX) and line.strip().endswith(".avfx")
+        path for path in (line.strip() for line in lines)
+        if path.startswith(VFX_FOLDERS) and path.endswith(".avfx")
     })
 
 
-def load_indoor_vfx(path: Path | str | None = None) -> list[str]:
-    """Read the saved indoor VFX list (default: the one shipped with the package)."""
+def load_housing_vfx(path: Path | str | None = None) -> list[str]:
+    """Read the saved housing VFX list (default: the one shipped with the package)."""
     path = Path(path) if path is not None else vfx_file_for(default_parts_file())
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -101,10 +107,10 @@ def load_indoor_vfx(path: Path | str | None = None) -> list[str]:
         return list(vfx)
     except FileNotFoundError:
         raise FileNotFoundError(
-            f"Saved indoor VFX list not found: {path}. Run the build with --refresh-parts to create it."
+            f"Saved housing VFX list not found: {path}. Run the build with --refresh-parts to create it."
         ) from None
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
-        raise ValueError(f"Saved indoor VFX list {path} is invalid: {exc}") from exc
+        raise ValueError(f"Saved housing VFX list {path} is invalid: {exc}") from exc
 
 
 def _write(path: Path, text: str) -> None:
@@ -117,10 +123,10 @@ def _write(path: Path, text: str) -> None:
 def refresh_parts(path: Path | str | None = None) -> tuple[Parts, bool]:
     """Download the path list once and update the saved lists that changed.
 
-    Updates the multi-part list (``path``) and the indoor VFX list next to it.
+    Updates the multi-part list (``path``) and the housing VFX list next to it.
     Returns ``(parts, changed)``; ``changed`` is true if either file was
     rewritten. Unchanged lists are left untouched. If the download has no
-    indoor VFX, the saved VFX list is kept as it is.
+    housing VFX, the saved VFX list is kept as it is.
     """
     path = Path(path) if path is not None else default_parts_file()
     raw = _fetch(PATH_LIST_URL)
@@ -140,12 +146,12 @@ def refresh_parts(path: Path | str | None = None) -> tuple[Parts, bool]:
     if parts_changed:
         _write(path, _to_json(parts))
 
-    vfx = extract_indoor_vfx(lines)
+    vfx = extract_housing_vfx(lines)
     vfx_path = vfx_file_for(path)
     vfx_changed = False
     if vfx:
         try:
-            vfx_changed = load_indoor_vfx(vfx_path) != vfx
+            vfx_changed = load_housing_vfx(vfx_path) != vfx
         except (FileNotFoundError, ValueError):
             vfx_changed = True
         if vfx_changed:

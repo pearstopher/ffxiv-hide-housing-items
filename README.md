@@ -30,7 +30,7 @@ Models:        1570
 Items:         1733
 Groups:        73 (1607 options)
 Multi-part:    307 models (+697 extra part files)
-Indoor VFX:    224 effects
+Housing VFX:   281 effects
 Parts list:    saved file
 Skipped:       3
 Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
@@ -68,11 +68,12 @@ python -m hide_housing build --refresh-parts
 This downloads the path list once and rewrites `model_parts.json` only if the parts changed. The
 summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit the updated file.
 
-### Indoor housing effects
+### Housing effects
 
-The *Effects: disable all* option uses a second saved list, `src/hide_housing/data/indoor_vfx.json`:
-every `.avfx` effect under `bgcommon/hou/common/vfx_hou_ind1/` in the same path list. It is
-refreshed by the same `--refresh-parts` download. Each effect is redirected to
+The *Effects: disable all* option uses a second saved list, `src/hide_housing/data/housing_vfx.json`:
+every `.avfx` effect in the same path list under these `bgcommon/hou/common/` folders:
+`vfx_hou_ind1`, `vfx_hou_dyna1`, `vfx_hou_com1` and `vfx_hou_craft1`. The outdoor folder,
+`vfx_hou_out1`, is not included. The list is refreshed by the same `--refresh-parts` download. Each effect is redirected to
 `vfx/path/nothing.avfx`, a file that doesn't exist, so it fails to load. That's the technique
 the [EasyEyes](https://github.com/0ceal0t/EasyEyes) plugin uses to remove effects.
 
@@ -89,9 +90,9 @@ the [EasyEyes](https://github.com/0ceal0t/EasyEyes) plugin uses to remove effect
      furniture item: *All flowers and plants* (everything grown from gardening seeds,
      including flowers planted in flowerpots) and *All food* (every food and drink item, served
      or eaten). These are best-guess lists and may not be perfect; see the option descriptions.
-   - **"Effects: disable all"**: one switch, *All indoor housing effects*, that turns off
-     every indoor housing visual effect (VFX) in the saved effect list. There are no individual
-     effect options.
+   - **"Effects: disable all"**: one switch, *All housing effects*, that turns off every
+     housing visual effect (VFX) in the saved effect list (see [Housing effects](#housing-effects)).
+     There are no individual effect options.
    - **"<Tab> – <Category>"** groups: one option per item, such as *Tabletop – Lighting →
      a specific lamp*. Large categories are split into "…, Part 1", "…, Part 2" groups, because
      Penumbra allows at most 32 options per group.
