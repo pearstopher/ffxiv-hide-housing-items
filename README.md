@@ -8,6 +8,13 @@ picks up new furniture after each patch.
 Nothing is hidden until you turn options on. Hidden furniture is swapped for a tiny replacement
 model so it no longer shows (see [Limitations](#limitations) for furniture made of several parts).
 
+## Download
+
+You don't need to build anything to use the mod. Download `hide-housing-furniture-<version>.pmp`
+from the latest [release](https://github.com/pearstopher/ffxiv-hide-housing-items/releases/latest),
+then follow [Install in Penumbra](#install-in-penumbra). The [presets](#presets) are attached to each
+release too.
+
 ## Build the mod
 
 Requires Python 3.11 or newer.
