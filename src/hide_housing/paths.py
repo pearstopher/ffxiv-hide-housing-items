@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 
 log = logging.getLogger(__name__)
 
@@ -21,15 +22,23 @@ def model_path(model_key: int) -> str:
     return MODEL_PATH_TEMPLATE.format(key=f"{model_key:04d}")
 
 
-def model_paths(model_key: int) -> list[str]:
+def model_paths(model_key: int, extra_parts: Sequence[str] = ()) -> list[str]:
     """Return every game path to replace to hide this model.
 
-    For now this is only the main ``.mdl``. Textures are left alone, and extra
-    parts of multi-part furniture (``_b1``, ``...a.mdl``) are not handled yet; see
-    docs/furniture-paths.md. Invalid keys are skipped with a warning and return [].
+    Always the main ``fun_b0_m{NNNN}.mdl``, plus ``extra_parts``: other ``.mdl``
+    file names in the same ``bgparts`` folder (e.g. ``fun_b0_m0405a.mdl``, a door
+    leaf), taken from the saved parts list (see hide_housing.parts). Textures are
+    left alone. Invalid keys are skipped with a warning and return [].
     """
     try:
-        return [model_path(model_key)]
+        main = model_path(model_key)
     except ValueError as exc:
         log.warning("Skipping furniture model: %s", exc)
         return []
+    folder = main.rsplit("/", 1)[0]
+    paths = [main]
+    for name in extra_parts:
+        path = f"{folder}/{name}"
+        if path not in paths:
+            paths.append(path)
+    return paths

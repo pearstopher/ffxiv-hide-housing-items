@@ -45,7 +45,8 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
 
     summary = capsys.readouterr().out
     for line in ["Tabs:          3", "Categories:    3", "Models:        3", "Items:         4",
-                 "Groups:        6 (6 options)", "Skipped:       0", f"Output:        {pmp.resolve()}"]:
+                 "Groups:        6 (6 options)", "Skipped:       0", "Parts list:    saved file",
+                 f"Output:        {pmp.resolve()}"]:
         assert line in summary
 
 
@@ -98,3 +99,37 @@ def test_python_dash_m_entry_point():
         [sys.executable, "-m", "hide_housing", "--version"], capture_output=True, text=True, check=True
     )
     assert "0.1.0" in result.stdout
+
+
+def test_multi_part_models_get_every_part_from_saved_list(tmp_path, cache, no_network, capsys, monkeypatch):
+    saved = tmp_path / "model_parts.json"
+    saved.write_text(json.dumps({"parts": {"0633": ["fun_b0_m0633a.mdl", "fun_b0_m0633b.mdl"]}}),
+                     encoding="utf-8")
+    monkeypatch.setattr("hide_housing.parts.default_parts_file", lambda: saved)
+    out = tmp_path / "dist"
+    assert cli.main(["build", "--cache-dir", str(cache), "--out", str(out)]) == 0
+
+    with zipfile.ZipFile(out / "hide-housing-furniture-0.1.0.pmp") as archive:
+        meta = json.loads(archive.read("meta.json"))
+    stage = next(o for g in meta["Groups"] for o in g["Options"] if o["Name"] == "Stage Panel")
+    folder = "bgcommon/hou/indoor/general/0633/bgparts"
+    assert sorted(stage["Files"]) == [f"{folder}/fun_b0_m0633.mdl", f"{folder}/fun_b0_m0633a.mdl",
+                                      f"{folder}/fun_b0_m0633b.mdl"]
+    assert "Multi-part:    1 models (+2 extra part files)" in capsys.readouterr().out
+
+
+def test_refresh_parts_flag_updates_saved_file(tmp_path, cache, capsys, monkeypatch):
+    import gzip
+    from hide_housing import parts
+    saved = tmp_path / "model_parts.json"
+    monkeypatch.setattr(parts, "default_parts_file", lambda: saved)
+    listing = "bgcommon/hou/indoor/general/0633/bgparts/fun_b0_m0633a.mdl\n"
+    monkeypatch.setattr(parts, "_fetch", lambda url: gzip.compress(listing.encode()))
+
+    args = ["build", "--refresh-parts", "--cache-dir", str(cache), "--out", str(tmp_path / "d")]
+    assert cli.main(args) == 0
+    assert "Parts list:    refreshed, saved file updated" in capsys.readouterr().out
+    assert json.loads(saved.read_text())["parts"] == {"0633": ["fun_b0_m0633a.mdl"]}
+
+    assert cli.main(args) == 0
+    assert "Parts list:    refreshed, no changes" in capsys.readouterr().out

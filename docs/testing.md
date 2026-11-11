@@ -22,6 +22,8 @@ output: paths, groups, the replacement model, or the Penumbra format.
 - [ ] **Hide one item:** turn off the category and turn on a single item option. Only that item
       (plus any items sharing its model, listed in the option description) is replaced.
 - [ ] **Everything off again:** turn every option off. All furniture returns to normal.
+- [ ] **Multi-part furniture:** hide a partition door and a canopy bed. Every part disappears
+      (door and frame, bed and canopy).
 - [ ] **Overlap:** turn on a category and one of its items together. The item stays hidden and
       nothing errors.
 

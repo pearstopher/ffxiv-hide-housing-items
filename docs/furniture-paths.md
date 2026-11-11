@@ -140,11 +140,13 @@ Examples:
 This matches the door observation: the main model is the frame, and the moving door is a
 separate part.
 
-**Bulk method:** at build time, download the path list, and for each model replace **every**
-`.mdl` listed under its `bgparts/` folder. This is programmatic and needs no per-item list.
-Limitation: parts nobody has loaded yet are missing from the list. A fallback could add the
-standard letter suffixes speculatively, but nothing confirms that unused redirects are harmless,
-so that would need in-game testing first. → follow-up issue.
+**Bulk method (implemented in #40):** for each model, replace **every** `.mdl` listed under its
+`bgparts/` folder. The path list is not downloaded on each build. `hide_housing.parts` extracted
+the extra part names once into `src/hide_housing/data/model_parts.json` (308 keys, 704 files;
+307 of them are current furniture models). Builds read that file, and
+`build --refresh-parts` downloads the list again and rewrites the file only if the parts changed.
+Limitation: parts nobody has loaded yet are missing from the list. No speculative (unlisted)
+suffixes are added, because nothing confirms that unused redirects are harmless.
 
 ### Finding 2: flowerpot flowers are shared gardening models
 
