@@ -29,11 +29,15 @@ Categories:    34
 Models:        1570
 Items:         1733
 Groups:        71 (1604 options)
+Multi-part:    307 models (+697 extra part files)
+Parts list:    saved file
 Skipped:       3
 Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
 ```
 
-"Skipped" lists furniture rows that have no item name in the game data.
+"Skipped" lists furniture rows that have no item name in the game data. "Multi-part" counts
+furniture made of several models (doors, canopy beds, partitions…), all of whose parts are hidden
+(see [Multi-part furniture](#multi-part-furniture)).
 
 | Option | What it does |
 |---|---|
@@ -41,9 +45,27 @@ Output:        ...\dist\hide-housing-furniture-0.1.0.pmp
 | `--out DIR` | Write the `.pmp` to `DIR` instead of `dist/` |
 | `--cache-dir DIR` | Keep downloaded CSVs in `DIR` instead of `.cache/datamining/` |
 | `--replacement MDL` | Use your own `.mdl` instead of the bundled replacement model |
+| `--refresh-parts` | Re-download the game path list and update the saved multi-part list if it changed |
 | `-v`, `--verbose` | Show progress and warnings |
 
 After a game patch, run `python -m hide_housing build --refresh` to pick up new furniture.
+
+### Multi-part furniture
+
+Some furniture is made of several models next to each other, e.g. a door's frame
+(`fun_b0_m0405.mdl`) and the door itself (`fun_b0_m0405a.mdl`). The extra parts come from the
+[ResLogger2](https://github.com/perchbirdd/ResLogger2) game path list. That list is large
+(~8 MB), so it is **not** downloaded on each build: the extra part names were extracted once and
+saved in `src/hide_housing/data/model_parts.json`, which every build reads.
+
+After a patch that adds new multi-part furniture, update the saved list with:
+
+```sh
+python -m hide_housing build --refresh-parts
+```
+
+This downloads the path list once and rewrites `model_parts.json` only if the parts changed. The
+summary shows `refreshed, saved file updated` or `refreshed, no changes`. Commit the updated file.
 
 ## Install in Penumbra
 
@@ -67,9 +89,10 @@ To update, build again and re-import the new `.pmp`.
 
 ## Limitations
 
-- Only each item's main model is replaced. Some furniture is built from more than one model, so
-  parts of it can stay visible
-  ([#35](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/35)).
+- Multi-part furniture is only fully hidden if all its parts are in the game path list, which only
+  includes files players have loaded. Content shown *in* furniture (e.g. flowers planted in a
+  flowerpot) belongs to a different item and isn't hidden
+  ([#41](https://github.com/pearstopher/ffxiv-hide-housing-items/issues/41)).
 - Indoor furniture only. Outdoor (yard) furniture is not included.
 
 ## Development

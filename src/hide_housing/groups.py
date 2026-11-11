@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 from hide_housing import penumbra
@@ -18,9 +18,19 @@ CATEGORY_GROUP_PRIORITY = 0
 ITEM_GROUP_PRIORITY = 1
 
 
-def hide_files(models: Iterable[FurnitureModel], replacement: str) -> dict[str, str]:
-    """``{game path: replacement}`` for every file of every model."""
-    return {path: replacement for model in models for path in model_paths(model.model_key)}
+# {model key: extra .mdl names in its bgparts folder}; see hide_housing.parts
+Parts = Mapping[int, Sequence[str]]
+
+
+def hide_files(models: Iterable[FurnitureModel], replacement: str, parts: Parts | None = None) -> dict[str, str]:
+    """``{game path: replacement}`` for every file of every model, including any
+    extra model parts listed in ``parts``."""
+    parts = parts or {}
+    return {
+        path: replacement
+        for model in models
+        for path in model_paths(model.model_key, parts.get(model.model_key, ()))
+    }
 
 
 def split_multi_groups(
@@ -48,7 +58,7 @@ def category_group_name(top: TopLevel) -> str:
     return f"{top.name}: hide whole categories"
 
 
-def category_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
+def category_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:
     """One group per top-level tab, with one option per subcategory.
 
     Turning an option on hides every furniture model in that subcategory.
@@ -60,7 +70,7 @@ def category_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
         name = category_group_name(top)
         options = []
         for sub in top.subcategories:
-            files = hide_files(sub.models, replacement)
+            files = hide_files(sub.models, replacement, parts)
             if not files:
                 continue
             count = len(sub.models)
@@ -83,9 +93,11 @@ def item_group_name(top: TopLevel, sub: Subcategory) -> str:
     return f"{top.name} – {sub.name}"
 
 
-def model_option(group_name: str, model: FurnitureModel, label: str, replacement: str) -> dict[str, Any] | None:
+def model_option(
+    group_name: str, model: FurnitureModel, label: str, replacement: str, parts: Parts | None = None
+) -> dict[str, Any] | None:
     """Option hiding one furniture model, or None if it has no valid paths."""
-    files = hide_files([model], replacement)
+    files = hide_files([model], replacement, parts)
     if not files:
         return None
     others = model.item_names[1:]
@@ -93,7 +105,7 @@ def model_option(group_name: str, model: FurnitureModel, label: str, replacement
     return option(group_name, label, files, description, id_key=f"model {model.model_key}")
 
 
-def item_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
+def item_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:
     """One group per subcategory with one option per furniture model.
 
     Options are named after the model's first item; other items sharing the
@@ -110,7 +122,7 @@ def item_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
                 label = model.name
                 if name_counts[label] > 1:  # keep option names unique within a group
                     label = f"{label} (model {model.model_key:04d})"
-                opt = model_option(name, model, label, replacement)
+                opt = model_option(name, model, label, replacement, parts)
                 if opt is not None:
                     options.append(opt)
             if options:
@@ -123,7 +135,7 @@ def item_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
     return groups
 
 
-def all_groups(catalog: Catalog, replacement: str) -> list[dict[str, Any]]:
+def all_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:
     """Every group in UI order: all "hide whole categories" groups first (in tab
     order), then all individual item groups (in tab/subcategory order)."""
-    return category_groups(catalog, replacement) + item_groups(catalog, replacement)
+    return category_groups(catalog, replacement, parts) + item_groups(catalog, replacement, parts)

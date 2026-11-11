@@ -17,6 +17,7 @@ from hide_housing.download import DEFAULT_CACHE_DIR, DownloadError, download_she
 from hide_housing.groups import all_groups
 from hide_housing.meta import ModInfo, build_meta, write_meta
 from hide_housing.package import DEFAULT_DIST_DIR, PackageError, package_mod
+from hide_housing.parts import Parts, load_parts, refresh_parts
 from hide_housing.sheets import SheetError
 
 log = logging.getLogger("hide_housing")
@@ -28,18 +29,24 @@ class BuildResult:
     catalog: Catalog
     group_count: int
     option_count: int
+    parts: Parts
+    parts_status: str
 
     def summary(self) -> str:
         cat = self.catalog
         subcategories = sum(len(top.subcategories) for top in cat.top_levels)
         models = cat.models
         items = sum(len(m.items) for m in models)
+        multi = [m for m in models if self.parts.get(m.model_key)]
+        extra_files = sum(len(self.parts[m.model_key]) for m in multi)
         lines = [
             f"Tabs:          {len(cat.top_levels)}",
             f"Categories:    {subcategories}",
             f"Models:        {len(models)}",
             f"Items:         {items}",
             f"Groups:        {self.group_count} ({self.option_count} options)",
+            f"Multi-part:    {len(multi)} models (+{extra_files} extra part files)",
+            f"Parts list:    {self.parts_status}",
             f"Skipped:       {len(cat.skipped)}",
         ]
         lines += [f"  - {reason}" for reason in cat.skipped]
@@ -53,15 +60,27 @@ def build(
     refresh: bool = False,
     replacement: Path | str | None = None,
     info: ModInfo = ModInfo(),
+    refresh_parts_list: bool = False,
 ) -> BuildResult:
-    """Download -> parse -> catalog -> groups -> meta.json -> .pmp."""
+    """Download -> parse -> catalog -> groups -> meta.json -> .pmp.
+
+    Extra model parts come from the saved parts list (hide_housing.parts); it is
+    only downloaded again when ``refresh_parts_list`` is true.
+    """
+    if refresh_parts_list:
+        log.info("Refreshing the saved model parts list")
+        parts, changed = refresh_parts()
+        parts_status = "refreshed, saved file updated" if changed else "refreshed, no changes"
+    else:
+        parts = load_parts()
+        parts_status = "saved file"
     log.info("Fetching datamining sheets into %s%s", cache_dir, " (refresh)" if refresh else "")
     sheet_paths = download_sheets(cache_dir, refresh=refresh)
     catalog = load_catalog(sheet_paths)
     with tempfile.TemporaryDirectory(prefix="hide_housing_build_") as tmp:
         build_dir = Path(tmp)
         replacement_path = bundle_replacement(build_dir, replacement)
-        groups = all_groups(catalog, replacement_path)
+        groups = all_groups(catalog, replacement_path, parts)
         write_meta(build_dir, build_meta(info, groups))
         output = package_mod(build_dir, out_dir)
     return BuildResult(
@@ -69,6 +88,8 @@ def build(
         catalog=catalog,
         group_count=len(groups),
         option_count=sum(len(g["Options"]) for g in groups),
+        parts=parts,
+        parts_status=parts_status,
     )
 
 
@@ -88,6 +109,8 @@ def make_parser() -> argparse.ArgumentParser:
                    help=f"where downloaded CSVs are kept (default: {DEFAULT_CACHE_DIR})")
     b.add_argument("--replacement", type=Path, metavar="MDL",
                    help="use this .mdl instead of the bundled replacement model")
+    b.add_argument("--refresh-parts", action="store_true",
+                   help="re-download the game path list and update the saved model parts list if it changed")
     b.add_argument("-v", "--verbose", action="store_true", help="show progress and warnings")
     return parser
 
@@ -99,7 +122,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         format="%(levelname)s: %(message)s",
     )
     try:
-        result = build(args.out, args.cache_dir, args.refresh, args.replacement)
+        result = build(args.out, args.cache_dir, args.refresh, args.replacement,
+                       refresh_parts_list=args.refresh_parts)
     except (DownloadError, SheetError, PackageError, FileNotFoundError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
