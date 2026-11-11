@@ -1,4 +1,4 @@
-"""Catch-all bulk options for things that aren't ordinary furniture models.
+"""The "Miscellaneous" bulk group: whole-kind options that aren't one tab's categories.
 
 Which things are covered always comes from datamined sheets. The model file
 names are a *best guess*: their naming pattern was derived from the ResLogger2
@@ -16,9 +16,8 @@ from hide_housing.meta import multi_group, option
 from hide_housing.paths import model_paths
 from hide_housing.sheets import read_sheet, to_bool
 
-CATCH_ALL_GROUP_NAME = "Catch-all: hide whole categories"
-CATCH_ALL_GROUP_PRIORITY = 0
-BEST_GUESS_NOTE = "Best guess: this may not catch every model, or may include a few that don't exist."
+MISC_GROUP_NAME = "Miscellaneous"
+MISC_GROUP_PRIORITY = 0
 
 # --- Plants ---------------------------------------------------------------------
 # Gardening models live in bgcommon/hou/outdoor/frm/{ModelID:04d}/bgparts/, where
@@ -31,11 +30,7 @@ GROWTH_STAGES = range(1, 6)
 POT_VARIANTS = range(0, 10)
 
 PLANTS_OPTION_NAME = "All flowers and plants"
-PLANTS_DESCRIPTION = (
-    "Hides everything grown from gardening seeds: flowers in flowerpots, crops and planted "
-    "shards. Garden plots outdoors use the same models, so they may be hidden there too. "
-    + BEST_GUESS_NOTE
-)
+PLANTS_DESCRIPTION = "Hides all flowers and plants grown from seeds (best guess, may miss some)."
 
 
 def load_garden_seeds(path: Path | str) -> dict[int, bool]:
@@ -72,7 +67,7 @@ FOOD_USAGE_TYPE = 7
 FOOD_STATE_SUFFIXES = ("a", "b")
 
 FOOD_OPTION_NAME = "All food"
-FOOD_DESCRIPTION = "Hides every food and drink furniture item, served or eaten. " + BEST_GUESS_NOTE
+FOOD_DESCRIPTION = "Hides all food and drink, served or eaten (best guess, may miss some)."
 
 
 def load_food_model_keys(path: Path | str) -> list[int]:
@@ -101,11 +96,8 @@ def food_model_paths(model_keys: Iterable[int], parts: Mapping[int, Sequence[str
 # remove effects; Penumbra's Resource Logger exempts this exact path from its
 # load-failure warnings for that reason (Penumbra ResourceWatcher.cs).
 NO_VFX_PATH = "vfx/path/nothing.avfx"
-EFFECTS_GROUP_NAME = "Effects: disable all"
-EFFECTS_GROUP_PRIORITY = 0
 HOUSING_VFX_OPTION_NAME = "All housing effects"
-# Option ID key from when the option was named for indoor effects only (#49), so
-# players who already turned it on keep that setting.
+# Stable option ID key (the option's first name, from #49).
 HOUSING_VFX_OPTION_ID_KEY = "All indoor housing effects"
 HOUSING_VFX_DESCRIPTION = (
     "Disables housing visual effects (VFX): every effect in the saved list from the indoor, "
@@ -115,29 +107,18 @@ HOUSING_VFX_DESCRIPTION = (
 )
 
 
-def effects_groups(housing_vfx: Sequence[str]) -> list[dict[str, Any]]:
-    """One Multi group with a single option that disables every listed housing VFX."""
-    if not housing_vfx:
-        return []
-    swaps = {path: NO_VFX_PATH for path in housing_vfx}
-    return [multi_group(
-        EFFECTS_GROUP_NAME,
-        [option(EFFECTS_GROUP_NAME, HOUSING_VFX_OPTION_NAME, {}, HOUSING_VFX_DESCRIPTION,
-                id_key=HOUSING_VFX_OPTION_ID_KEY, file_swaps=swaps)],
-        EFFECTS_GROUP_PRIORITY,
-        "Turn off housing visual effects.",
-    )]
-
-
 # --- Group ----------------------------------------------------------------------
+
+Spec = tuple[str, list[str], str]  # (option name, game paths, description)
+
 
 def catch_all_option_specs(
     garden_seeds_path: Path | str | None = None,
     furniture_path: Path | str | None = None,
     parts: Mapping[int, Sequence[str]] | None = None,
-) -> list[tuple[str, list[str], str]]:
-    """``[(option name, game paths, description)]`` for every catch-all with data."""
-    specs: list[tuple[str, list[str], str]] = []
+) -> list[Spec]:
+    """Flowers/plants and food option specs, for whichever sheets are given."""
+    specs: list[Spec] = []
     if garden_seeds_path is not None:
         plant_paths = plant_model_paths(load_garden_seeds(garden_seeds_path))
         if plant_paths:
@@ -149,17 +130,28 @@ def catch_all_option_specs(
     return specs
 
 
-def catch_all_groups(specs: list[tuple[str, list[str], str]], replacement: str) -> list[dict[str, Any]]:
-    """One Multi group (all options off) with an option per catch-all."""
+def misc_groups(
+    specs: Sequence[Spec],
+    replacement: str,
+    housing_vfx: Sequence[str] = (),
+) -> list[dict[str, Any]]:
+    """The "Miscellaneous" bulk group (all options off): one option per spec
+    (model paths -> replacement), then one option disabling every housing VFX."""
     options = [
-        option(CATCH_ALL_GROUP_NAME, name, {path: replacement for path in paths}, description)
+        option(MISC_GROUP_NAME, name, {path: replacement for path in paths}, description)
         for name, paths, description in specs
     ]
+    if housing_vfx:
+        options.append(option(
+            MISC_GROUP_NAME, HOUSING_VFX_OPTION_NAME, {}, HOUSING_VFX_DESCRIPTION,
+            id_key=HOUSING_VFX_OPTION_ID_KEY,
+            file_swaps={path: NO_VFX_PATH for path in housing_vfx},
+        ))
     if not options:
         return []
     return [multi_group(
-        CATCH_ALL_GROUP_NAME,
+        MISC_GROUP_NAME,
         options,
-        CATCH_ALL_GROUP_PRIORITY,
-        "Hide whole kinds of things that aren't single furniture items. Best-guess lists.",
+        MISC_GROUP_PRIORITY,
+        "Hide whole kinds of things at once. Some lists are best guesses.",
     )]

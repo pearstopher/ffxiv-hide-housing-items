@@ -1,27 +1,25 @@
 from pathlib import Path
 
 from hide_housing import penumbra
-from hide_housing.catalog import load_catalog
 from hide_housing.catchall import (
-    CATCH_ALL_GROUP_NAME,
-    EFFECTS_GROUP_NAME,
+    FOOD_DESCRIPTION,
     FOOD_OPTION_NAME,
+    HOUSING_VFX_OPTION_NAME,
+    MISC_GROUP_NAME,
     NO_VFX_PATH,
+    PLANTS_DESCRIPTION,
     PLANTS_OPTION_NAME,
-    catch_all_groups,
     catch_all_option_specs,
-    effects_groups,
     food_model_paths,
     load_food_model_keys,
     load_garden_seeds,
+    misc_groups,
     plant_model_paths,
 )
-from hide_housing.groups import all_groups
-from hide_housing.meta import ModInfo, build_meta
+from hide_housing.meta import stable_id
 from hide_housing.parts import extract_housing_vfx, load_housing_vfx
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
-SHEETS = ("HousingFurniture", "FurnitureCatalogItemList", "FurnitureCatalogCategory", "Item")
 REPLACEMENT = "files\\replacement.mdl"
 FRM = "bgcommon/hou/outdoor/frm"
 
@@ -32,6 +30,8 @@ CAPTURED = [
     f"{FRM}/0006/bgparts/frm_f4_m0006.mdl",  # shards (planted crystals)
 ]
 
+
+# --- plants (#41) -----------------------------------------------------------------
 
 def test_load_garden_seeds_from_datamined_fixture():
     assert load_garden_seeds(FIXTURES / "GardeningSeed.csv") == {1: False, 6: False, 102: True, 106: True}
@@ -54,39 +54,6 @@ def test_plant_path_pattern_counts():
 
 def test_plant_ids_outside_three_digits_are_skipped():
     assert plant_model_paths({1000: True, 0: False}) == []
-
-
-def test_catch_all_group_has_single_plants_option_off_by_default():
-    specs = catch_all_option_specs(FIXTURES / "GardeningSeed.csv")
-    (group,) = catch_all_groups(specs, REPLACEMENT)
-    assert group["Name"] == CATCH_ALL_GROUP_NAME
-    assert group["Type"] == "Multi" and group["DefaultSettings"] == penumbra.ALL_OPTIONS_OFF
-    (plants,) = group["Options"]
-    assert plants["Name"] == PLANTS_OPTION_NAME
-    assert "may not catch every model" in plants["Description"]
-    assert set(plants["Files"].values()) == {REPLACEMENT}
-    assert set(CAPTURED) <= set(plants["Files"])
-
-
-def test_no_individual_flower_options_and_bulk_groups_come_first():
-    catalog = load_catalog({name: FIXTURES / f"{name}.csv" for name in SHEETS})
-    catch_all = catch_all_groups(catch_all_option_specs(FIXTURES / "GardeningSeed.csv"), REPLACEMENT)
-    groups = all_groups(catalog, REPLACEMENT, catch_all=catch_all)
-    names = [g["Name"] for g in groups]
-    assert names[:4] == [
-        "Furnishings: hide whole categories",
-        "Tables: hide whole categories",
-        "Tabletop: hide whole categories",
-        CATCH_ALL_GROUP_NAME,
-    ]
-    garden_options = [o for g in groups for o in g["Options"] if any("/outdoor/frm/" in p for p in o["Files"])]
-    assert [o["Name"] for o in garden_options] == [PLANTS_OPTION_NAME]
-    build_meta(ModInfo(), groups)
-
-
-def test_no_catch_all_without_data():
-    assert catch_all_option_specs(None) == []
-    assert catch_all_groups([], REPLACEMENT) == []
 
 
 # --- food (#44) -------------------------------------------------------------------
@@ -126,27 +93,21 @@ def test_food_paths_main_plus_both_states_plus_saved_parts():
     ]
 
 
-def test_catch_all_group_has_plants_and_food_and_nothing_individual(tmp_path):
-    specs = catch_all_option_specs(FIXTURES / "GardeningSeed.csv", write_furniture(tmp_path))
-    (group,) = catch_all_groups(specs, REPLACEMENT)
-    assert [o["Name"] for o in group["Options"]] == [PLANTS_OPTION_NAME, FOOD_OPTION_NAME]
-    food = group["Options"][1]
-    assert "may not catch every model" in food["Description"]
-    assert len(food["Files"]) == 2 * 3
-    assert group["DefaultSettings"] == penumbra.ALL_OPTIONS_OFF
-
-
 def test_shipped_fixture_has_no_food_so_no_food_option():
-    specs = catch_all_option_specs(None, FIXTURES / "HousingFurniture.csv")
-    assert specs == []
+    assert catch_all_option_specs(None, FIXTURES / "HousingFurniture.csv") == []
 
 
-# --- indoor VFX (#49) ---------------------------------------------------------------
+def test_plant_and_food_descriptions_are_one_short_sentence():
+    for description in (PLANTS_DESCRIPTION, FOOD_DESCRIPTION):
+        assert description.count(". ") == 0 and description.endswith(".")
+        assert "best guess" in description
+        assert len(description) <= 100
 
-VFX = "bgcommon/hou/common/vfx_hou_ind1/eff"
 
+# --- housing VFX (#49, #51) ---------------------------------------------------------
 
 COMMON = "bgcommon/hou/common"
+VFX = f"{COMMON}/vfx_hou_ind1/eff"
 INCLUDED = ("vfx_hou_ind1", "vfx_hou_dyna1", "vfx_hou_com1", "vfx_hou_craft1")
 
 
@@ -173,27 +134,29 @@ def test_shipped_housing_vfx_list():
     vfx = load_housing_vfx()
     assert vfx == sorted(set(vfx))
     assert all(p.endswith(".avfx") for p in vfx)
-    folders = {p.split("/")[3] for p in vfx}
-    assert folders == set(INCLUDED)
+    assert {p.split("/")[3] for p in vfx} == set(INCLUDED)
     assert len([p for p in vfx if "/vfx_hou_ind1/" in p]) >= 200
 
 
-def test_effects_option_keeps_its_original_id():
-    from hide_housing.meta import stable_id
-    (group,) = effects_groups([f"{VFX}/a.avfx"])
-    assert group["Options"][0]["Name"] == "All housing effects"
-    assert group["Options"][0]["Id"] == stable_id("option", EFFECTS_GROUP_NAME, "All indoor housing effects")
+# --- Miscellaneous group (#53) ------------------------------------------------------
 
-
-def test_effects_group_is_one_bulk_option_using_file_swaps():
-    (group,) = effects_groups([f"{VFX}/a.avfx", f"{VFX}/b.avfx"])
-    assert group["Name"] == EFFECTS_GROUP_NAME
+def test_misc_group_has_one_bulk_option_each_in_order_all_off(tmp_path):
+    rugs = ("All rugs", [f"{GENERAL}/0001/bgparts/fun_b0_m0001.mdl"], "Hides all rugs.")
+    specs = [rugs] + catch_all_option_specs(FIXTURES / "GardeningSeed.csv", write_furniture(tmp_path))
+    (group,) = misc_groups(specs, REPLACEMENT, [f"{VFX}/a.avfx", f"{VFX}/b.avfx"])
+    assert group["Name"] == MISC_GROUP_NAME == "Miscellaneous"
     assert group["Type"] == "Multi" and group["DefaultSettings"] == penumbra.ALL_OPTIONS_OFF
-    (opt,) = group["Options"]
-    assert opt["Files"] == {}
-    assert opt["FileSwaps"] == {f"{VFX}/a.avfx": NO_VFX_PATH, f"{VFX}/b.avfx": NO_VFX_PATH}
-    assert "may not be complete" in opt["Description"]
+    names = [o["Name"] for o in group["Options"]]
+    assert names == ["All rugs", PLANTS_OPTION_NAME, FOOD_OPTION_NAME, HOUSING_VFX_OPTION_NAME]
+
+    plants, food, effects = group["Options"][1:]
+    assert set(CAPTURED) <= set(plants["Files"]) and set(plants["Files"].values()) == {REPLACEMENT}
+    assert len(food["Files"]) == 2 * 3
+    assert effects["Files"] == {}
+    assert effects["FileSwaps"] == {f"{VFX}/a.avfx": NO_VFX_PATH, f"{VFX}/b.avfx": NO_VFX_PATH}
+    assert effects["Id"] == stable_id("option", MISC_GROUP_NAME, "All indoor housing effects")
 
 
-def test_no_effects_group_without_vfx():
-    assert effects_groups([]) == []
+def test_misc_group_needs_something_to_hold():
+    assert misc_groups([], REPLACEMENT) == []
+    assert catch_all_option_specs(None) == []

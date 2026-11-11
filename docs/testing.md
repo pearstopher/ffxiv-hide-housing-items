@@ -11,8 +11,8 @@ output: paths, groups, the replacement model, or the Penumbra format.
       with **Import...**
 - [ ] Penumbra shows **Hide Housing Furniture** with no import warnings
 - [ ] The mod is enabled for the **Default** collection (it won't work in any other)
-- [ ] Settings list every "<Tab>: hide whole categories" group first, then "Catch-all: hide whole
-      categories", then the "<Tab> – <Category>" groups
+- [ ] Settings list the "<Tab>: Hide Categories" groups first (no Rugs group), then
+      "Miscellaneous", then the "<Tab> – <Category>" groups
 - [ ] No group has more than 32 options. Penumbra would warn about ignored options otherwise.
 
 ## Behaviour (inside a house with furniture placed)
@@ -25,12 +25,12 @@ output: paths, groups, the replacement model, or the Penumbra format.
 - [ ] **Everything off again:** turn every option off. All furniture returns to normal.
 - [ ] **Multi-part furniture:** hide a partition door and a canopy bed. Every part disappears
       (door and frame, bed and canopy).
-- [ ] **Catch-all flowers:** turn on *Catch-all → All flowers and plants*. Flowers planted in
+- [ ] **Rugs:** turn on *Miscellaneous → All rugs*. All rugs disappear.
+- [ ] **Flowers:** turn on *Miscellaneous → All flowers and plants*. Flowers planted in
       flowerpots disappear and the pots stay.
-- [ ] **Catch-all food:** turn on *Catch-all → All food*. All food disappears, both served and
-      eaten.
-- [ ] **Effects:** turn on *Effects: disable all → All housing effects*. Housing effects stop
-      showing, and nothing errors or crashes.
+- [ ] **Food:** turn on *Miscellaneous → All food*. All food disappears, both served and eaten.
+- [ ] **Effects:** turn on *Miscellaneous → All housing effects*. Housing effects stop showing,
+      and nothing errors or crashes.
 - [ ] **Overlap:** turn on a category and one of its items together. The item stays hidden and
       nothing errors.
 
@@ -42,7 +42,7 @@ house and come back in before checking the result.
 - Multi-part furniture is hidden using the saved parts list (#40). If an item still leaves parts
   visible, open an issue. A part missing from the list can be fixed with `--refresh-parts`. Don't
   keep a list of individual items in this file.
-- The catch-all options (#41, #44) are best guesses. If they miss something, open an issue.
+- The Miscellaneous flowers, food and effects options (#41, #44, #49) are best guesses. If they miss something, open an issue.
 
 ## Results
 

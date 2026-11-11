@@ -38,14 +38,21 @@ def test_build_end_to_end_offline(tmp_path, cache, no_network, capsys):
         assert set(archive.namelist()) == {"meta.json", "files/replacement.mdl"}
         meta = json.loads(archive.read("meta.json"))
     assert meta["Author"] == "Ane Mora"
-    assert [g["Name"] for g in meta["Groups"]][:2] == [
-        "Furnishings: hide whole categories",
-        "Tables: hide whole categories",
+    # Every fixture tab has a single category, so all of them go to Miscellaneous
+    # (like Rugs in the real data), followed by the item groups.
+    assert [g["Name"] for g in meta["Groups"]] == [
+        "Miscellaneous",
+        "Furnishings – Walls/Pillars/Partitions",
+        "Tables – Tables",
+        "Tabletop – Other",
+    ]
+    assert [o["Name"] for o in meta["Groups"][0]["Options"]] == [
+        "All furnishings", "All tables", "All tabletop", "All flowers and plants", "All housing effects",
     ]
 
     summary = capsys.readouterr().out
     for line in ["Tabs:          3", "Categories:    3", "Models:        3", "Items:         4",
-                 "Groups:        8 (8 options)", "Housing VFX:   281 effects",
+                 "Groups:        4 (8 options)", "Housing VFX:   281 effects",
                  "Skipped:       0", "Parts list:    saved file",
                  f"Output:        {pmp.resolve()}"]:
         assert line in summary

@@ -4,8 +4,15 @@ import pytest
 
 from hide_housing import penumbra
 from hide_housing.catalog import Catalog, FurnitureModel, Subcategory, TopLevel, load_catalog
-from hide_housing.groups import all_groups, category_groups, hide_files, item_groups, split_multi_groups
-from hide_housing.meta import ModInfo, build_meta, option
+from hide_housing.groups import (
+    all_groups,
+    category_groups,
+    hide_files,
+    item_groups,
+    single_category_specs,
+    split_multi_groups,
+)
+from hide_housing.meta import ModInfo, build_meta, multi_group, option
 from hide_housing.paths import model_path
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -31,9 +38,9 @@ def test_hide_files_maps_every_model_to_replacement():
 def test_category_groups_from_fixtures():
     groups = category_groups(fixture_catalog(), REPLACEMENT)
     assert [g["Name"] for g in groups] == [
-        "Furnishings: hide whole categories",
-        "Tables: hide whole categories",
-        "Tabletop: hide whole categories",
+        "Furnishings: Hide Categories",
+        "Tables: Hide Categories",
+        "Tabletop: Hide Categories",
     ]
     furnishings, tables, tabletop = groups
     (walls,) = furnishings["Options"]
@@ -74,8 +81,8 @@ def test_many_categories_are_split_into_parts():
     subs = [Subcategory(f"Cat {i:02d}", i, i, [model(i + 1)]) for i in range(40)]
     groups = category_groups(Catalog([TopLevel(12, "Furnishings", subs)]), REPLACEMENT)
     assert [g["Name"] for g in groups] == [
-        "Furnishings: hide whole categories, Part 1",
-        "Furnishings: hide whole categories, Part 2",
+        "Furnishings: Hide Categories, Part 1",
+        "Furnishings: Hide Categories, Part 2",
     ]
     assert [len(g["Options"]) for g in groups] == [32, 8]
 
@@ -153,14 +160,36 @@ def test_invalid_models_are_left_out():
     assert [o["Name"] for o in group["Options"]] == ["Fine"]
 
 
-def test_all_groups_lists_every_category_group_before_item_groups():
-    names = [g["Name"] for g in all_groups(fixture_catalog(), REPLACEMENT)]
-    assert names == [
-        "Furnishings: hide whole categories",
-        "Tables: hide whole categories",
-        "Tabletop: hide whole categories",
-        "Furnishings – Walls/Pillars/Partitions",
-        "Tables – Tables",
-        "Tabletop – Other",
+def test_all_groups_bulk_groups_first_and_single_category_tabs_get_no_category_group():
+    tops = [
+        TopLevel(12, "Furnishings", [
+            Subcategory("Chairs/Sofas", 1, 4, [model(1, "Chair")]),
+            Subcategory("Beds", 3, 5, [model(2, "Bed")]),
+        ]),
+        TopLevel(16, "Rugs", [Subcategory("Rugs", 0, 27, [model(3, "Rug")])]),
     ]
-    build_meta(ModInfo(), all_groups(fixture_catalog(), REPLACEMENT))
+    misc = [multi_group("Miscellaneous", [option("Miscellaneous", "All rugs", {})])]
+    groups = all_groups(Catalog(tops), REPLACEMENT, catch_all=misc)
+    assert [g["Name"] for g in groups] == [
+        "Furnishings: Hide Categories",
+        "Miscellaneous",
+        "Furnishings – Chairs/Sofas",
+        "Furnishings – Beds",
+        "Rugs – Rugs",
+    ]
+    build_meta(ModInfo(), groups)
+
+
+def test_category_groups_can_skip_single_category_tabs():
+    assert category_groups(fixture_catalog(), REPLACEMENT, min_subcategories=2) == []
+    assert len(category_groups(fixture_catalog(), REPLACEMENT)) == 3
+
+
+def test_single_category_specs_make_an_all_option_per_single_category_tab():
+    tops = [
+        TopLevel(12, "Furnishings", [Subcategory("A", 1, 1, [model(1)]), Subcategory("B", 2, 2, [model(2)])]),
+        TopLevel(16, "Rugs", [Subcategory("Rugs", 0, 27, [model(3, "Rug"), model(4, "Mat")])]),
+    ]
+    assert single_category_specs(Catalog(tops), REPLACEMENT) == [
+        ("All rugs", [model_path(3), model_path(4)], "Hides all rugs."),
+    ]

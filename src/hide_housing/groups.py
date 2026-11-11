@@ -55,18 +55,27 @@ def split_multi_groups(
 
 
 def category_group_name(top: TopLevel) -> str:
-    return f"{top.name}: hide whole categories"
+    return f"{top.name}: Hide Categories"
 
 
-def category_groups(catalog: Catalog, replacement: str, parts: Parts | None = None) -> list[dict[str, Any]]:
+def category_groups(
+    catalog: Catalog,
+    replacement: str,
+    parts: Parts | None = None,
+    min_subcategories: int = 1,
+) -> list[dict[str, Any]]:
     """One group per top-level tab, with one option per subcategory.
 
     Turning an option on hides every furniture model in that subcategory.
     Subcategory names repeat across tabs ("Miscellaneous"), so the tab is part of
-    the group name. All options are off by default.
+    the group name. All options are off by default. Tabs with fewer than
+    ``min_subcategories`` subcategories are skipped; the mod uses 2 so that a
+    single-category tab (Rugs) goes to Miscellaneous instead (``single_category_specs``).
     """
     groups: list[dict[str, Any]] = []
     for top in catalog.top_levels:
+        if len(top.subcategories) < min_subcategories:
+            continue
         name = category_group_name(top)
         options = []
         for sub in top.subcategories:
@@ -87,6 +96,22 @@ def category_groups(catalog: Catalog, replacement: str, parts: Parts | None = No
                 f"Hide every item in a {top.name} category at once.",
             ))
     return groups
+
+
+def single_category_specs(
+    catalog: Catalog, replacement: str, parts: Parts | None = None
+) -> list[tuple[str, list[str], str]]:
+    """Bulk options for tabs with only one subcategory (currently Rugs), as
+    ``(name, game paths, description)`` for the Miscellaneous group."""
+    specs = []
+    for top in catalog.top_levels:
+        if len(top.subcategories) != 1:
+            continue
+        paths = list(hide_files(top.subcategories[0].models, replacement, parts))
+        if paths:
+            label = top.name.lower()
+            specs.append((f"All {label}", paths, f"Hides all {label}."))
+    return specs
 
 
 def item_group_name(top: TopLevel, sub: Subcategory) -> str:
@@ -141,11 +166,11 @@ def all_groups(
     parts: Parts | None = None,
     catch_all: Sequence[dict[str, Any]] = (),
 ) -> list[dict[str, Any]]:
-    """Every group in UI order: all bulk groups first (the per-tab "hide whole
-    categories" groups, then the ``catch_all`` groups), then all individual item
-    groups (in tab/subcategory order)."""
+    """Every group in UI order: all bulk groups first (the per-tab "Hide
+    Categories" groups, then the ``catch_all`` groups, i.e. Miscellaneous), then
+    all individual item groups (in tab/subcategory order)."""
     return (
-        category_groups(catalog, replacement, parts)
+        category_groups(catalog, replacement, parts, min_subcategories=2)
         + list(catch_all)
         + item_groups(catalog, replacement, parts)
     )

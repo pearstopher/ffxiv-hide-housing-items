@@ -13,9 +13,9 @@ from pathlib import Path
 from hide_housing import __version__
 from hide_housing.assets import bundle_replacement
 from hide_housing.catalog import Catalog, load_catalog
-from hide_housing.catchall import catch_all_groups, catch_all_option_specs, effects_groups
+from hide_housing.catchall import catch_all_option_specs, misc_groups
 from hide_housing.download import DEFAULT_CACHE_DIR, DownloadError, download_sheets
-from hide_housing.groups import all_groups
+from hide_housing.groups import all_groups, single_category_specs
 from hide_housing.meta import ModInfo, build_meta, write_meta
 from hide_housing.package import DEFAULT_DIST_DIR, PackageError, package_mod
 from hide_housing.parts import Parts, load_housing_vfx, load_parts, refresh_parts
@@ -87,7 +87,8 @@ def build(
         specs = catch_all_option_specs(
             sheet_paths.get("GardeningSeed"), sheet_paths.get("HousingFurniture"), parts
         )
-        catch_all = catch_all_groups(specs, replacement_path) + effects_groups(housing_vfx)
+        specs = single_category_specs(catalog, replacement_path, parts) + specs
+        catch_all = misc_groups(specs, replacement_path, housing_vfx)
         groups = all_groups(catalog, replacement_path, parts, catch_all)
         write_meta(build_dir, build_meta(info, groups))
         output = package_mod(build_dir, out_dir)
