@@ -49,3 +49,21 @@ def test_readme_lists_every_preset_file():
     for name, path in PRESETS.items():
         assert (ROOT / path).is_file(), path
         assert f"| {name} | [`{path}`]({path}) |" in README
+
+
+def test_preset_files_are_valid_penumbra_presets():
+    import base64
+    import gzip
+    import json
+
+    for name, path in PRESETS.items():
+        text = (ROOT / path).read_text(encoding="utf-8").strip()
+        assert text, f"{name} preset is empty"
+        data = gzip.decompress(base64.b64decode(text))
+        assert data[0] == 1, "Penumbra preset format version byte"
+        preset = json.loads(data[1:])
+        assert preset["Settings"], name
+        for group in preset["Settings"]:
+            assert group["Identifier"] and group["Name"]
+            for option in group.get("Options", []):
+                assert option["State"] in ("Enabled", "Disabled")
